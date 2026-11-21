@@ -1,0 +1,2660 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>مُعلّم أوفيس الذكي | Smart Office Tutor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1f5f9;--surface:#ffffff;--text:#0f172a;--muted:#64748b;--primary:#2563eb;--primary-soft:#dbeafe;--border:#e2e8f0;--success:#16a34a;--warn:#f59e0b;--danger:#dc2626}
+[data-theme="dark"]{--bg:#0b1120;--surface:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--border:#334155;--primary:#3b82f6;--primary-soft:#1e3a8a}
+[data-theme="blue"]{--bg:#eff6ff;--surface:#ffffff;--text:#1e3a8a;--muted:#3b82f6;--border:#bfdbfe;--primary:#1d4ed8;--primary-soft:#dbeafe}
+[data-theme="green"]{--bg:#f0fdf4;--surface:#ffffff;--text:#14532d;--muted:#16a34a;--border:#bbf7d0;--primary:#15803d;--primary-soft:#dcfce7}
+[data-theme="purple"]{--bg:#faf5ff;--surface:#ffffff;--text:#4c1d95;--muted:#8b5cf6;--border:#ddd6fe;--primary:#7c3aed;--primary-soft:#ede9fe}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;padding:0;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Cairo','Inter',sans-serif;transition:background .3s,color .3s;display:flex;flex-direction:column}
+[dir="ltr"] body{font-family:'Inter','Cairo',sans-serif}
+.surface{background:var(--surface);border:1px solid var(--border)}
+.text-muted{color:var(--muted)}
+.btn-primary{background:var(--primary);color:#fff;border:none;cursor:pointer;transition:all .2s}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-soft{background:var(--primary-soft);color:var(--primary);border:none;cursor:pointer;transition:all .2s}
+.btn-soft:hover{filter:brightness(.95)}
+.card-hover{transition:all .2s}.card-hover:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,.08)}
+
+/* ══════════ DEVICE VIEWPORT SIMULATION FRAMES ══════════ */
+.app-shell{flex:1;display:flex;overflow:hidden;height:calc(100vh - 56px)}
+.viewport-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:8px}
+.app-frame{width:100%;height:100%;margin:0 auto;transition:all .35s cubic-bezier(0.22, 1, 0.36, 1);background:var(--bg);position:relative;overflow-y:auto;overflow-x:hidden;padding:12px}
+
+.app-frame.desktop{max-width:100%;border-radius:12px;border:none}
+.app-frame.laptop{
+  max-width:1024px;
+  height:92%;
+  border-radius:16px 16px 4px 4px;
+  border:8px solid #1e293b;
+  border-bottom-width:14px;
+  box-shadow:0 20px 50px -12px rgba(0,0,0,.35), 0 0 0 2px #475569;
+  padding:14px;
+}
+.laptop-base{
+  width:100%;
+  max-width:1080px;
+  height:12px;
+  background:linear-gradient(180deg, #94a3b8 0%, #475569 100%);
+  border-radius:0 0 14px 14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.25);
+  margin:0 auto;
+  position:relative;
+  flex-shrink:0;
+}
+.laptop-base::after{
+  content:'';
+  position:absolute;
+  top:0;left:50%;transform:translateX(-50%);
+  width:110px;height:4px;
+  background:#334155;
+  border-radius:0 0 6px 6px;
+}
+.app-frame.mobile{
+  max-width:390px;
+  height:96%;
+  border-radius:38px;
+  border:10px solid #0f172a;
+  box-shadow:0 20px 55px -10px rgba(0,0,0,.45), 0 0 0 3px #334155;
+  padding:12px;
+  padding-top:24px;
+}
+.app-frame.mobile::before{
+  content:'';
+  position:sticky;
+  top:-16px;
+  display:block;
+  width:100px;
+  height:16px;
+  background:#0f172a;
+  border-radius:999px;
+  margin:-16px auto 10px auto;
+  z-index:30;
+}
+.app-frame.mobile .grid-cols-2,
+.app-frame.mobile .md\:grid-cols-2,
+.app-frame.mobile .md\:grid-cols-3,
+.app-frame.mobile .md\:grid-cols-4{
+  grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+}
+.app-frame.mobile .md\:flex-row{
+  flex-direction: column !important;
+  align-items: flex-start !important;
+}
+
+.view-btn{transition:all .2s;color:var(--muted)}
+.view-btn.active{background:var(--primary);color:#ffffff;font-weight:700;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:rgba(100,116,139,.35);border-radius:4px}
+.chat-user{background:var(--primary);color:#fff;border-radius:18px 18px 4px 18px;padding:10px 14px;max-width:85%;word-wrap:break-word}
+.chat-ai{background:var(--surface);border:1px solid var(--border);border-radius:18px 18px 18px 4px;padding:12px 16px;max-width:88%;word-wrap:break-word}
+[dir="ltr"] .chat-user{border-radius:18px 18px 18px 4px}
+[dir="ltr"] .chat-ai{border-radius:18px 18px 4px 18px}
+.pulse-rec{animation:pulse 1.2s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hidden{display:none!important}
+.fade-in{animation:fadeIn .3s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--surface);padding:12px 22px;border-radius:12px;z-index:9999;box-shadow:0 10px 25px rgba(0,0,0,.25);animation:fadeIn .3s;font-weight:600;font-size:14px}
+.sidebar-link.active{background:var(--primary-soft);color:var(--primary);font-weight:700}
+.chip{background:var(--primary-soft);color:var(--primary);padding:5px 12px;border-radius:999px;font-size:12px;cursor:pointer;border:none;transition:all .2s}
+.chip:hover{filter:brightness(.93)}
+.avatar-opt.selected{border-color:var(--primary);background:var(--primary-soft)}
+.audio-wave{display:inline-flex;align-items:center;gap:2px;height:14px}
+.audio-wave span{display:inline-block;width:3px;background:currentColor;border-radius:2px;animation:wave 0.8s infinite ease-in-out}
+.audio-wave span:nth-child(2){animation-delay:.15s}
+.audio-wave span:nth-child(3){animation-delay:.3s}
+@keyframes wave{0%,100%{height:4px}50%{height:14px}}
+
+/* ══════════ CUTE ANIMATED ROBOT SVG ══════════ */
+@keyframes robotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes robotWave{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-18deg)}75%{transform:rotate(14deg)}}
+@keyframes robotBlink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(0.1)}}
+@keyframes antennaGlow{0%,100%{opacity:1;r:6}50%{opacity:.5;r:8}}
+.robot-float{animation:robotFloat 3s ease-in-out infinite}
+.robot-arm-wave{transform-origin:22px 86px;animation:robotWave 1.8s ease-in-out infinite}
+.robot-eye{transform-origin:center 50px;animation:robotBlink 4s infinite}
+.robot-antenna{animation:antennaGlow 1.5s infinite}
+</style>
+</head>
+<body>
+
+<!-- ══════════ TOP BAR ══════════ -->
+<header id="topbar" class="surface border-b z-40 shadow-sm hidden shrink-0">
+  <div class="flex flex-wrap items-center justify-between px-3 py-2 gap-2">
+    <div class="flex items-center gap-2">
+      <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="القائمة"><i class="fas fa-bars"></i></button>
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold shadow-sm" style="background:var(--primary);"><i class="fas fa-robot"></i></div>
+      <div>
+        <span class="font-bold text-sm sm:text-base block leading-tight" id="brand">مُعلّم أوفيس الذكي</span>
+        <span class="text-[10px] text-muted hidden sm:inline-block" id="voiceBadgeTop"><i class="fas fa-volume-high text-blue-500"></i> المساعد الصوتي الذكي</span>
+      </div>
+    </div>
+
+    <!-- ══════════ DEVICE VIEW SWITCHER ══════════ -->
+    <div class="flex items-center gap-1 rounded-xl p-1 border" style="background:var(--bg);border-color:var(--border);" role="group">
+      <button onclick="setViewMode('desktop')" class="view-btn px-2 py-1 rounded-lg text-xs flex items-center gap-1" data-mode="desktop">
+        <i class="fas fa-desktop"></i>
+        <span class="hidden sm:inline" data-i18n="modeDesktop">كمبيوتر</span>
+      </button>
+      <button onclick="setViewMode('laptop')" class="view-btn px-2 py-1 rounded-lg text-xs flex items-center gap-1" data-mode="laptop">
+        <i class="fas fa-laptop"></i>
+        <span class="hidden sm:inline" data-i18n="modeLaptop">لابتوب</span>
+      </button>
+      <button onclick="setViewMode('mobile')" class="view-btn px-2 py-1 rounded-lg text-xs flex items-center gap-1" data-mode="mobile">
+        <i class="fas fa-mobile-screen-button"></i>
+        <span class="hidden sm:inline" data-i18n="modeMobile">موبايل</span>
+      </button>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <button id="globalStopAudioBtn" onclick="stopAllAudio()" class="hidden px-2.5 py-1.5 rounded-lg text-xs font-bold bg-red-100 text-red-700 hover:bg-red-200 items-center gap-1">
+        <span class="audio-wave"><span></span><span></span><span></span></span>
+        <span data-i18n="stopAudio">إيقاف</span>
+      </button>
+      <button onclick="cycleTheme()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="تغيير السمة"><i class="fas fa-moon" id="themeIcon"></i></button>
+      <button onclick="toggleLanguage()" class="px-2.5 py-1.5 rounded-lg text-xs font-bold btn-soft"><span id="langLabel">EN</span></button>
+      <button onclick="openSettings()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="الإعدادات"><i class="fas fa-cog"></i></button>
+    </div>
+  </div>
+</header>
+
+<div class="app-shell">
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside id="sidebar" class="surface w-60 h-full overflow-y-auto p-3 hidden shrink-0 border-e" style="border-color:var(--border);">
+    <nav id="navLinks" class="space-y-1"></nav>
+  </aside>
+
+  <!-- ══════════ MAIN VIEWPORT STAGE ══════════ -->
+  <main class="viewport-stage">
+    <div id="viewportBanner" class="hidden text-center mb-1.5 shrink-0">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold surface shadow-sm">
+        <i id="viewportBannerIcon" class="fas fa-laptop text-blue-500"></i>
+        <span id="viewportBannerText">معاينة وضع اللابتوب</span>
+        <button onclick="setViewMode('desktop')" class="underline text-blue-600 ms-2" data-i18n="resetDesktop">العودة للكمبيوتر</button>
+      </span>
+    </div>
+
+    <div id="appFrame" class="app-frame desktop">
+      <div id="pageContent" class="fade-in h-full"></div>
+    </div>
+    <div id="laptopBase" class="laptop-base hidden"></div>
+  </main>
+</div>
+
+<!-- ══════════ SETTINGS MODAL ══════════ -->
+<div id="settingsModal" class="modal-backdrop hidden">
+  <div class="surface rounded-2xl p-5 w-full max-w-lg max-h-[88vh] overflow-y-auto shadow-2xl">
+    <div class="flex justify-between items-center mb-4 pb-2 border-b" style="border-color:var(--border);">
+      <h2 class="text-xl font-bold"><i class="fas fa-cog text-blue-600"></i> <span data-i18n="settings">الإعدادات</span></h2>
+      <button onclick="closeModal('settingsModal')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="space-y-4">
+      <!-- SMART VOICE SETTINGS -->
+      <div class="p-4 rounded-xl border-2 border-blue-400/40" style="background:var(--primary-soft);">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-bold text-sm flex items-center gap-2">
+            <i class="fas fa-wand-magic-sparkles text-blue-600"></i>
+            <span data-i18n="smartVoiceTitle">المساعد الصوتي الذكي (عربي / إنجليزي)</span>
+          </div>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-600 text-white font-bold">HD Voice</span>
+        </div>
+
+        <label class="block text-xs font-bold mb-1" data-i18n="ttsEngineLabel">محرك النطق الصوتي</label>
+        <select id="ttsEngine" class="w-full surface rounded-lg px-3 py-2 mb-3 text-sm font-semibold">
+          <option value="gemini">الصوت الذكي فائق الوضوح (عربي وإنجليزي تلقائي)</option>
+          <option value="browser">صوت النظام الافتراضي (بدون إنترنت)</option>
+        </select>
+
+        <div id="geminiVoiceWrap">
+          <label class="block text-xs font-bold mb-1" data-i18n="voicePersonaLabel">اختيار نبرة الصوت</label>
+          <select id="geminiVoiceName" class="w-full surface rounded-lg px-3 py-2 mb-3 text-sm">
+            <option value="Aoede">Aoede — صوت أنثوي واضح ومشرق (مُوصى به للشرح)</option>
+            <option value="Kore">Kore — صوت أنثوي رصين وهادئ</option>
+            <option value="Sulafat">Sulafat — صوت دافئ وودود</option>
+            <option value="Puck">Puck — صوت ذكوري حيوي وواضح</option>
+            <option value="Charon">Charon — صوت ذكوري تعليمي رصين</option>
+            <option value="Fenrir">Fenrir — صوت ذكوري حماسي</option>
+          </select>
+
+          <button type="button" id="testVoiceBtn" onclick="testBilingualVoice()" class="btn-primary w-full py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2">
+            <i class="fas fa-volume-high"></i>
+            <span data-i18n="testVoiceBtn">تجربة الصوت الآن</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- AI Chat Provider Settings -->
+      <div class="p-3.5 rounded-xl border" style="border-color:var(--border);background:var(--bg);">
+        <div class="font-bold text-sm mb-2"><i class="fas fa-brain text-purple-600"></i> إعدادات الذكاء الاصطناعي للمحادثة</div>
+        <label class="block text-xs mb-1">المزود (Provider)</label>
+        <select id="aiProvider" class="w-full surface rounded-lg px-3 py-2 mb-2 text-sm">
+          <option value="local">قاعدة المعرفة الذكية (يعمل فوراً بدون مفتاح)</option>
+          <option value="gemini">الذكاء الاصطناعي السحابي المتقدم</option>
+        </select>
+        <label class="block text-xs mb-1">مفتاح الربط الاختياري (API Key)</label>
+        <input id="aiKey" type="password" placeholder="••••••••••••" class="w-full surface rounded-lg px-3 py-2 mb-1 text-sm" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-2" data-i18n="theme">السمة</label>
+        <div class="grid grid-cols-5 gap-2" id="themeGrid"></div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-2" data-i18n="avatar">شكل الروبوت</label>
+        <div class="grid grid-cols-6 gap-2" id="avatarGrid"></div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-2" data-i18n="botName">اسم الروبوت</label>
+        <input id="botNameInput" class="w-full surface rounded-lg px-3 py-2 text-sm" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold mb-1" data-i18n="speechRate">سرعة الصوت (<span id="rateVal">1.0</span>x)</label>
+          <input type="range" min="0.7" max="1.6" step="0.1" id="speechRate" class="w-full" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1" data-i18n="fontSize">حجم الخط (<span id="fsVal">16</span>px)</label>
+          <input type="range" min="13" max="20" id="fontSize" class="w-full" />
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="exportData()" class="btn-soft px-4 py-2 rounded-lg font-bold flex-1 text-sm"><i class="fas fa-download"></i> تصدير البيانات</button>
+        <button onclick="openResetConfirm()" class="px-4 py-2 rounded-lg font-bold flex-1 text-sm" style="background:#fee2e2;color:#991b1b;"><i class="fas fa-trash"></i> مسح الكل</button>
+      </div>
+    </div>
+
+    <div class="mt-5 flex justify-end">
+      <button onclick="saveSettings()" class="btn-primary px-6 py-2.5 rounded-xl font-bold text-sm" data-i18n="save">حفظ وإغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CONFIRM RESET MODAL ══════════ -->
+<div id="resetConfirmModal" class="modal-backdrop hidden">
+  <div class="surface rounded-2xl p-5 w-full max-w-sm text-center shadow-2xl">
+    <div class="text-4xl text-red-500 mb-3"><i class="fas fa-triangle-exclamation"></i></div>
+    <h3 class="font-bold text-lg mb-2" data-i18n="confirmResetTitle">تأكيد مسح البيانات</h3>
+    <p class="text-sm text-muted mb-5" data-i18n="confirmResetDesc">سيتم مسح كافة الدروس المكتملة والمحادثات والنقاط. هل أنت متأكد؟</p>
+    <div class="flex gap-2">
+      <button onclick="closeModal('resetConfirmModal')" class="btn-soft py-2 rounded-xl font-bold flex-1 text-sm" data-i18n="cancel">إلغاء</button>
+      <button onclick="executeResetAll()" class="py-2 rounded-xl font-bold flex-1 text-sm bg-red-600 text-white" data-i18n="confirmYes">نعم، امسح الكل</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ EMBED MODAL ══════════ -->
+<div id="embedModal" class="modal-backdrop hidden">
+  <div class="surface rounded-2xl p-5 w-full max-w-lg shadow-2xl">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold"><i class="fas fa-code text-indigo-600"></i> <span data-i18n="embedCode">كود التضمين</span></h2>
+      <button onclick="closeModal('embedModal')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><i class="fas fa-times"></i></button>
+    </div>
+    <p class="text-sm text-muted mb-3">انسخ الكود والصقه في أي موقع لتضمين التطبيق.</p>
+    <textarea id="embedCodeArea" class="w-full h-32 surface rounded-lg p-3 text-xs font-mono" readonly></textarea>
+    <div class="mt-3 flex gap-2">
+      <button onclick="copyEmbed()" class="btn-primary px-4 py-2 rounded-lg font-bold flex-1"><i class="fas fa-copy"></i> نسخ</button>
+      <button onclick="previewEmbed()" class="btn-soft px-4 py-2 rounded-lg font-bold flex-1"><i class="fas fa-external-link-alt"></i> معاينة</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script>
+/* ═════════════════════════════════════════════════════════════════════════
+   1. KNOWLEDGE BASE
+═════════════════════════════════════════════════════════════════════════ */
+const KB = [
+  { id:'w-intro', lessonId:'w-u1-l1', title:'ما هو Microsoft Word؟',
+    keywords:['word','ما','هو','معالج','نصوص','مقدمة','بدء','start','word processing','برنامج'],
+    content:'Microsoft Word هو معالج نصوص (Word Processing) يستخدم الحاسوب لإنشاء وتحرير وطباعة المستندات. يسمح بحفظ الوثيقة والرجوع إليها لاحقاً، وتصحيح الأخطاء بسهولة، ويدعم لغات متعددة. لبدء العمل: 1) افتح قائمة Start. 2) اختر Microsoft Office. 3) انقر MS Word 2019. 4) من شاشة البداية اختر Blank document.',
+    source:'الفصل الأول - أساسيات Word' },
+  { id:'w-features', lessonId:'w-u1-l2', title:'خصائص Microsoft Word',
+    keywords:['خصائص','ميزات','features','حماية','كلمة','مرور','فهرس','جداول','لغات','تدقيق'],
+    content:'من خصائص Word: 1) كتابة بلغات متعددة. 2) التدقيق الإملائي والنحوي. 3) إعداد الصفحة (الهوامش، الاتجاه، حجم الورق). 4) التنسيق (محاذاة، خط، لون، خلفية). 5) إدراج صور وأشكال. 6) جداول وفرز ومعادلات. 7) بحث واستبدال. 8) حماية بكلمة مرور. 9) حفظ كصفحة ويب أو قالب. 10) فهرس المحتويات وإدارة المراجع.',
+    source:'خصائص Word' },
+  { id:'w-qat', lessonId:'w-u2-l1', title:'شريط الوصول السريع QAT',
+    keywords:['qat','وصول','سريع','شريط','أدوات','undo','redo','save','تخصيص','إضافة'],
+    content:'QAT (شريط أدوات الوصول السريع) هو شريط أعلى يسار Word يحتوي: Save (حفظ)، Undo (تراجع)، Redo (إعادة). لإضافة أمر: 1) انقر سهم Customize بجانب QAT. 2) اختر More Commands. 3) اختر الأمر من القائمة. 4) اضغط Add ثم OK.',
+    source:'واجهة Word' },
+  { id:'w-ribbon', lessonId:'w-u2-l2', title:'الشريط Ribbon والتبويبات',
+    keywords:['ribbon','شريط','تبويب','home','insert','design','layout','references','review','view','help','مجموعة'],
+    content:'الشريط Ribbon هو المنطقة أعلى مساحة العمل. يحتوي على تبويبات: Home (الرئيسية)، Insert (إدراج)، Design (تصميم)، Layout (تخطيط)، References (مراجع)، Mailings (مراسلات)، Review (مراجعة)، View (عرض)، Help (مساعدة).',
+    source:'تبويبات Ribbon' },
+  { id:'w-save', lessonId:'w-u6-l1', title:'حفظ المستند Save As',
+    keywords:['حفظ','save','as','pdf','docx','file','tab','ctrl','s','autosave'],
+    content:'للحفظ: File > Save As > اختر الموقع > اكتب الاسم > اختر الصيغة (.docx افتراضية أو .pdf) > Save. الحفظ المتكرر: Ctrl+S.',
+    source:'إدارة الملفات' },
+  { id:'p-intro', lessonId:'p-u1-l1', title:'مقدمة إلى PowerPoint',
+    keywords:['powerpoint','بوربوينت','عرض','presentation','شريحة','slide','blank'],
+    content:'PowerPoint برنامج عروض تقديمية احترافية. الواجهة: تبويبات أعلى، لوحة شرائح (يسار)، منطقة تحرير (وسط). ابدأ: File > New > Blank Presentation.',
+    source:'أساسيات PowerPoint' },
+  { id:'p-animation', lessonId:'p-u4-l1', title:'الحركات Animation vs الانتقالات Transitions',
+    keywords:['animation','حركة','transition','انتقال','animate','fade','fly','pane','slide'],
+    content:'Animation (حركة): تُحرك عنصراً داخل الشريحة (Appear, Fade, Fly In). Transition (انتقال): تأثير الانتقال بين شريحة وأخرى (Fade, Push, Wipe).',
+    source:'الحركات والانتقالات' },
+  { id:'p-design', lessonId:'p-u5-l1', title:'قواعد التصميم الاحترافي',
+    keywords:['تصميم','design','نص','text','لون','color','قواعد','6x6','احتراف'],
+    content:'قواعد التصميم: 1) قلل النص (قاعدة 6x6). 2) استخدم مساحات بيضاء. 3) صورة واحدة قوية لكل شريحة. 4) تباين عالٍ بين النص والخلفية.',
+    source:'التصميم الاحترافي' }
+];
+
+/* ═════════════════════════════════════════════════════════════════════════
+   2. CURRICULUM WITH DISTINCT ICONS
+═════════════════════════════════════════════════════════════════════════ */
+const tL = o => (o && typeof o === 'object') ? (o[state.lang] || o.ar || o.en || '') : String(o || '');
+const L = (ar, en) => ({ ar, en });
+
+const CUR = {
+  word: {
+    title: L('Microsoft Word','Microsoft Word'),
+    icon: 'fa-file-word', color: '#2b579a',
+    units: [
+      { id:'w-u1', icon:'fa-book-open-reader', color:'#2563eb', title:L('الوحدة 1: مقدمة إلى Word','Unit 1: Introduction to Word'),
+        lessons: [
+          { id:'w-u1-l1', icon:'fa-file-lines', title:L('ما هو Microsoft Word؟','What is Microsoft Word?'),
+            objective:L('فهم معالج النصوص وأهمية برنامج Word','Understand word processing and Word'),
+            content:L('Word برنامج معالجة نصوص لإنشاء وتحرير وطباعة المستندات. يدعم لغات متعددة، تدقيق إملائي، جداول، صور، حماية بكلمة مرور، وفهارس تلقائية.','Word is a word processor for creating, editing, and printing documents. It supports multiple languages, spell check, tables, images, password protection, and automatic tables of contents.'),
+            steps:L(['افتح قائمة Start ثم Microsoft Office ثم Word.','اختر مستند فارغ Blank document.','ابدأ الكتابة في منطقة العمل.','احفظ المستند بالضغط على Ctrl+S.'],['Open Start > Microsoft Office > Word.','Choose Blank document.','Start typing in the work area.','Save the document using Ctrl+S.']),
+            tips:L('احفظ عملك كل 5 دقائق باستخدام Ctrl+S','Save your work every 5 minutes using Ctrl+S'),
+            mistakes:L('نسيان حفظ المستند قبل إغلاق البرنامج','Forgetting to save the document before closing'),
+            summary:L('Word هو أداة معالجة النصوص الأشهر والأكثر كفاءة.','Word is the leading and most efficient word processor.'),
+            image:'https://images.unsplash.com/photo-1517842645767-c639042777db?w=800',
+            quiz:[
+              {q:L('ما هو برنامج Microsoft Word؟','What is Microsoft Word?'),options:[L('برنامج معالجة نصوص','Word processor'),L('متصفح إنترنت','Web browser')],answer:0},
+              {q:L('ما هو اختصار الحفظ السريع؟','What is the quick save shortcut?'),options:[L('Ctrl+S','Ctrl+S'),L('Ctrl+P','Ctrl+P')],answer:0}
+            ]
+          },
+          { id:'w-u1-l2', icon:'fa-list-check', title:L('خصائص ومميزات Word','Word Features & Capabilities'),
+            objective:L('التعرف على أهم خصائص برنامج Word','Explore key features of Word'),
+            content:L('يتميز Word بالكتابة بلغات متعددة، التدقيق الإملائي والنحوي، إعداد الهوامش والصفحات، إدراج الصور والجداول، البحث والاستبدال، وحماية المستندات بكلمة مرور.','Word features multi-language typing, spelling and grammar check, page margins setup, inserting images and tables, find and replace, and password protection.'),
+            steps:L(['جرب كتابة فقرة وتنسيقها من تبويب Home.','أدرج جدولاً من تبويب Insert.','فعّل الحماية من File > Info > Protect Document.'],['Try typing and formatting a paragraph from Home tab.','Insert a table from Insert tab.','Enable protection via File > Info > Protect Document.']),
+            tips:L('استخدم البحث والاستبدال Ctrl+H لتعديل الكلمات المتكررة بسرعة','Use Ctrl+H to replace repeated words quickly'),
+            mistakes:L('استخدام المسافات المتكررة بدل المحاذاة التلقائية','Using repeated spaces instead of proper alignment'),
+            summary:L('Word نظام متكامل لإنتاج المستندات الاحترافية.','Word is a complete system for producing professional documents.'),
+            image:'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800',
+            quiz:[]
+          }
+        ]
+      },
+      { id:'w-u2', icon:'fa-window-maximize', color:'#0891b2', title:L('الوحدة 2: واجهة المستخدم','Unit 2: User Interface'),
+        lessons: [
+          { id:'w-u2-l1', icon:'fa-bolt', title:L('شريط الوصول السريع QAT','Quick Access Toolbar'),
+            objective:L('التعرف على شريط الوصول السريع وتخصيصه','Learn and customize QAT'),
+            content:L('شريط الوصول السريع QAT يقع أعلى النافذة ويضم أوامر الحفظ Save والتراجع Undo والإعادة Redo ويمكن إضافة أي أمر إليه بنقرة واحدة.','The Quick Access Toolbar sits at the top of the window with Save, Undo, and Redo commands, and can be customized with one click.'),
+            steps:L(['انقر سهم التخصيص بجانب شريط QAT.','اختر More Commands.','حدد الأمر واضغط Add ثم OK.'],['Click the Customize arrow next to QAT.','Choose More Commands.','Select the command, click Add, then OK.']),
+            tips:L('يمكنك التراجع عن عدة خطوات دفعة واحدة من سهم Undo','You can undo multiple actions at once using the Undo arrow'),
+            mistakes:L('البحث عن الأوامر السريعة في القوائم الفرعية البعيدة','Searching for quick commands in distant submenus'),
+            summary:L('QAT يمنحك وصولاً فورياً لأهم الأدوات.','QAT gives instant access to your essential tools.'),
+            image:'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800',
+            quiz:[{q:L('أين يقع شريط الوصول السريع QAT؟','Where is QAT located?'),options:[L('أعلى النافذة','Top of the window'),L('أسفل الشاشة','Bottom of the screen')],answer:0}]
+          },
+          { id:'w-u2-l2', icon:'fa-table-columns', title:L('الشريط الرئيسي Ribbon','The Ribbon Tabs'),
+            objective:L('فهم التبويبات والمجموعات في الشريط','Understand tabs and groups in the Ribbon'),
+            content:L('يضم الشريط تبويبات Home و Insert و Design و Layout و References و Review و View، وينقسم كل تبويب إلى مجموعات منظمة للأدوات.','The Ribbon contains Home, Insert, Design, Layout, References, Review, and View tabs, each organized into logical tool groups.'),
+            steps:L(['تنقل بين التبويبات لاستكشاف المجموعات.','مرر المؤشر فوق أي أداة لعرض تلميح الوظيفة.','أدرج صورة لملاحظة ظهور التبويب السياقي.'],['Switch between tabs to explore tool groups.','Hover over any tool to view its tooltip.','Insert an image to observe the contextual tab.']),
+            tips:L('اضغط مفتاح Alt لإظهار اختصارات لوحة المفاتيح على التبويبات','Press Alt to display keyboard access keys on tabs'),
+            mistakes:L('البحث عن أدوات إدراج الصور داخل تبويب Home','Looking for picture insertion tools inside Home tab'),
+            summary:L('Ribbon هو مركز التحكم الكامل في Word.','The Ribbon is the complete control center in Word.'),
+            image:'https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=800',
+            quiz:[]
+          }
+        ]
+      },
+      { id:'w-u6', icon:'fa-floppy-disk', color:'#16a34a', title:L('الوحدة 3: الحفظ والتصدير','Unit 3: Saving & Exporting'),
+        lessons: [
+          { id:'w-u6-l1', icon:'fa-file-pdf', title:L('حفظ المستند بصيغ مختلفة Save As','Save Document Formats (Save As)'),
+            objective:L('حفظ المستند بصيغة Word أو PDF','Save documents as Word or PDF'),
+            content:L('من قائمة File اختر Save As ثم حدد المجلد واكتب اسم الملف واختر النوع المطلوب مثل .docx للتحرير أو .pdf للمشاركة والطباعة.','From File menu choose Save As, pick a folder, type a file name, and select .docx for editing or .pdf for sharing and printing.'),
+            steps:L(['اضغط على تبويب File.','اختر Save As ثم Browse.','اكتب اسم المستند واختر PDF أو Word Document.','اضغط Save.'],['Click the File tab.','Choose Save As then Browse.','Type the document name and select PDF or Word Document.','Click Save.']),
+            tips:L('تصدير الملف كـ PDF يحافظ على تنسيق الخطوط والصفحات على أي جهاز','Exporting as PDF preserves fonts and layout on any device'),
+            mistakes:L('إغلاق المستند قبل التأكد من حفظ آخر التعديلات','Closing the document before saving recent changes'),
+            summary:L('Save As يمنحك مرونة كاملة في حفظ ومشاركة ملفاتك.','Save As gives full flexibility in saving and sharing files.'),
+            image:'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800',
+            quiz:[{q:L('لحفظ المستند بصيغة PDF نستخدم؟','To save a document as PDF we use?'),options:[L('File > Save As > PDF','File > Save As > PDF'),L('تبويب Review','Review tab')],answer:0}]
+          }
+        ]
+      }
+    ]
+  },
+  powerpoint: {
+    title: L('Microsoft PowerPoint','Microsoft PowerPoint'),
+    icon: 'fa-file-powerpoint', color: '#b7472a',
+    units: [
+      { id:'p-u1', icon:'fa-display', color:'#ea580c', title:L('الوحدة 1: أساسيات العروض','Unit 1: Presentation Basics'),
+        lessons: [
+          { id:'p-u1-l1', icon:'fa-chalkboard', title:L('مقدمة إلى PowerPoint','Introduction to PowerPoint'),
+            objective:L('التعرف على واجهة PowerPoint وإنشاء عرض جديد','Learn PowerPoint interface and create a deck'),
+            content:L('PowerPoint هو البرنامج الرائد لتصميم العروض التقديمية التفاعلية عبر شرائح منظمة تدعم النصوص والصور والرسوم البيانية والحركات.','PowerPoint is the leading application for designing interactive presentations through structured slides supporting text, images, charts, and animations.'),
+            steps:L(['افتح برنامج PowerPoint.','اختر Blank Presentation أو قالباً جاهزاً.','أضف عنوان العرض في الشريحة الأولى.','أضف شريحة جديدة بالضغط على Ctrl+M.'],['Open PowerPoint.','Select Blank Presentation or a template.','Add presentation title on the first slide.','Add a new slide using Ctrl+M.']),
+            tips:L('استخدم أبعاد الشاشة العريضة 16:9 للعروض الحديثة','Use 16:9 widescreen ratio for modern displays'),
+            mistakes:L('كتابة فقرات طويلة جداً داخل الشريحة الواحدة','Writing overly long paragraphs inside a single slide'),
+            summary:L('العرض التقديمي الناجح يعتمد على شرائح واضحة ومختصرة.','A successful presentation relies on clear and concise slides.'),
+            image:'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800',
+            quiz:[{q:L('ما هو اختصار إضافة شريحة جديدة؟','What is the shortcut for a new slide?'),options:[L('Ctrl+M','Ctrl+M'),L('Ctrl+B','Ctrl+B')],answer:0}]
+          }
+        ]
+      },
+      { id:'p-u4', icon:'fa-wand-magic-sparkles', color:'#7c3aed', title:L('الوحدة 2: الحركات والانتقالات','Unit 2: Animations & Transitions'),
+        lessons: [
+          { id:'p-u4-l1', icon:'fa-film', title:L('الحركات Animation والانتقالات Transitions','Animations vs Transitions'),
+            objective:L('التمييز بين تحريك العناصر وانتقال الشرائح','Distinguish element animations from slide transitions'),
+            content:L('تُستخدم الحركات Animations لتحريك العناصر داخل الشريحة الواحدة، بينما تُستخدم الانتقالات Transitions لتحديد طريقة الانتقال من شريحة إلى أخرى.','Animations move individual elements inside a slide, whereas Transitions control how one slide moves to the next.'),
+            steps:L(['حدد النص أو الصورة داخل الشريحة.','افتح تبويب Animations واختر حركة مناسبة مثل Fade.','انتقل إلى تبويب Transitions لاختيار انتقال سلس بين الشرائح.'],['Select text or an image on the slide.','Open Animations tab and choose Fade.','Open Transitions tab to pick a smooth slide transition.']),
+            tips:L('حافظ على توحيد نوع الانتقال في جميع شرائح العرض','Keep slide transitions consistent across the whole deck'),
+            mistakes:L('الإفراط في استخدام الحركات السريعة المشتتة للانتباه','Overusing fast, distracting animations'),
+            summary:L('التوازن في الحركات يضفي حيوية واحترافية على عرضك.','Balanced animations add vitality and professionalism to your deck.'),
+            image:'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800',
+            quiz:[{q:L('تُطبق الحركات Animations على؟','Animations are applied to?'),options:[L('العناصر داخل الشريحة','Elements inside a slide'),L('إغلاق البرنامج','Closing the app')],answer:0}]
+          }
+        ]
+      },
+      { id:'p-u5', icon:'fa-palette', color:'#db2777', title:L('الوحدة 3: قواعد التصميم الاحترافي','Unit 3: Professional Design Rules'),
+        lessons: [
+          { id:'p-u5-l1', icon:'fa-gem', title:L('قاعدة 6×6 وتنسيق الألوان','The 6x6 Rule & Color Harmony'),
+            objective:L('تطبيق معايير التصميم البصري الجذاب','Apply attractive visual design standards'),
+            content:L('تعتمد الشريحة الاحترافية على قاعدة 6×6 (بحد أقصى 6 أسطر و6 كلمات في السطر)، مع تباين واضح بين لون الخط والخلفية واستخدام صورة معبّرة واحدة.','A professional slide follows the 6x6 rule (max 6 lines and 6 words per line), strong contrast between text and background, and one expressive visual.'),
+            steps:L(['اختصر النقاط الرئيسية في جمل قصيرة.','اختر لون خلفية هادئ مع خط داكن واضح.','أضف أيقونة أو مخططاً لتوضيح الفكرة.'],['Summarize key points into short phrases.','Choose a calm background with clear dark text.','Add an icon or chart to illustrate the idea.']),
+            tips:L('اترك مساحة بيضاء كافية لراحة عين المشاهد','Leave enough whitespace for visual comfort'),
+            mistakes:L('استخدام أكثر من 3 خطوط مختلفة في العرض الواحد','Using more than 3 different fonts in one presentation'),
+            summary:L('البساطة والتباين هما سر جاذبية الشرائح.','Simplicity and contrast are the secret to engaging slides.'),
+            image:'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
+            quiz:[]
+          }
+        ]
+      }
+    ]
+  }
+};
+
+/* ═════════════════════════════════════════════════════════════════════════
+   3. STATE & STORAGE
+═════════════════════════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'smartOfficeTutor_v5';
+const defaultState = {
+  lang:'ar', theme:'light', viewMode:'desktop', page:'splash',
+  auth:{ role:null, loggedIn:false, devUsername:'Rahma', devPassword:'12345' },
+  user:{
+    id:'u_'+Math.random().toString(36).slice(2,8), name:'طالب',
+    points:0, level:1, badges:[], completedLessons:[], quizResults:{},
+    conversations:[], files:[]
+  },
+  devStudio:{
+    customLessons:[],
+    deletedLessonIds:[],
+    customTabs:[],
+    hiddenTabs:[],
+    tabOverrides:{},
+    welcomeTitleAr:'أهلاً بك في مُعلّم أوفيس الذكي!',
+    welcomeTitleEn:'Welcome to Smart Office Tutor!',
+    welcomeDescAr:'رفيقك الذكي لإتقان Microsoft Word و PowerPoint بخطوات سهلة وتفاعلية وصوت واضح.',
+    welcomeDescEn:'Your smart companion to master Microsoft Word and PowerPoint with interactive steps and clear voice.'
+  },
+  settings:{
+    botName:'أوفيس بوت', avatar:'🤖', speechRate:1, fontSize:16,
+    aiProvider:'local', aiKey:'', customEndpoint:'',
+    ttsEngine:'gemini', geminiVoiceName:'Aoede'
+  },
+  ctx:{ lessonId:null, program:null, conversationId:null }
+};
+
+let state = loadState();
+if(!state.auth) state.auth = JSON.parse(JSON.stringify(defaultState.auth));
+if(!state.devStudio) state.devStudio = JSON.parse(JSON.stringify(defaultState.devStudio));
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return JSON.parse(JSON.stringify(defaultState));
+    return deepMerge(JSON.parse(JSON.stringify(defaultState)), JSON.parse(raw));
+  }catch{ return JSON.parse(JSON.stringify(defaultState)); }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function deepMerge(t,s){
+  for(const k in s){
+    if(s[k] && typeof s[k]==='object' && !Array.isArray(s[k])){
+      t[k] = deepMerge(t[k]||{}, s[k]);
+    } else t[k] = s[k];
+  }
+  return t;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   4. I18N
+═════════════════════════════════════════════════════════════════════════ */
+const I18N = {
+  ar:{
+    dashboard:'الرئيسية', learning:'مركز التعلم', chatbot:'اسأل الروبوت',
+    lab:'مساحة التدريب', quizzes:'الاختبارات', skills:'المهارات',
+    library:'مكتبتي', profile:'ملفي', admin:'الإدارة', settings:'الإعدادات', embedCode:'تضمين',
+    switchRole:'تغيير الحساب',
+    welcome:'أهلاً', progress:'التقدم', lessonsDone:'دروس مكتملة',
+    badges:'الشارات', points:'نقاط', lastLesson:'آخر درس', nextLesson:'الدرس التالي',
+    quickAccess:'وصول سريع', word:'Word', powerpoint:'PowerPoint',
+    startLearning:'ابدأ التعلم', continueLearning:'استكمل', units:'وحدات',
+    lesson:'درس', objective:'الهدف', steps:'الخطوات', tips:'نصائح',
+    mistakes:'أخطاء شائعة', summary:'ملخص', quiz:'اختبر نفسك',
+    prev:'السابق', next:'التالي', askBot:'اسأل الروبوت',
+    markDone:'تم إكمال الدرس', done:'مكتمل', sendMessage:'اكتب سؤالك هنا...',
+    voiceInput:'تحدث بصوتك', listen:'استمع بصوت واضح', listenLesson:'استمع للدرس',
+    stopAudio:'إيقاف', loadingAudio:'جاري التوليد الصوتي...',
+    newChat:'محادثة جديدة', history:'المحادثات', quizTitle:'اختبار',
+    submit:'إرسال', score:'الدرجة',
+    theme:'السمة', avatar:'شكل الروبوت', botName:'اسم الروبوت',
+    speechRate:'سرعة الصوت', fontSize:'حجم الخط', save:'حفظ وإغلاق',
+    light:'فاتح', dark:'داكن', blue:'أزرق', green:'أخضر', purple:'بنفسجي',
+    noData:'لا توجد بيانات بعد', aiThinking:'الروبوت يفكر...', question:'سؤال',
+    errorOccurred:'حدث خطأ', copied:'تم النسخ', sources:'مصادر',
+    askAnything:'اسألني أي شيء عن Word أو PowerPoint',
+    modeDesktop:'كمبيوتر', modeLaptop:'لابتوب', modeMobile:'موبايل', resetDesktop:'العودة للكمبيوتر',
+    smartVoiceTitle:'المساعد الصوتي الذكي (عربي / إنجليزي)',
+    ttsEngineLabel:'محرك النطق الصوتي', voicePersonaLabel:'اختيار نبرة الصوت',
+    testVoiceBtn:'تجربة الصوت الآن',
+    confirmResetTitle:'تأكيد مسح البيانات',
+    confirmResetDesc:'سيتم مسح كافة البيانات المحفوظة. هل أنت متأكد؟',
+    cancel:'إلغاء', confirmYes:'نعم، امسح الكل'
+  },
+  en:{
+    dashboard:'Dashboard', learning:'Learning', chatbot:'Ask Bot',
+    lab:'Practice Lab', quizzes:'Quizzes', skills:'Skills',
+    library:'Library', profile:'Profile', admin:'Admin', settings:'Settings', embedCode:'Embed',
+    switchRole:'Switch Account',
+    welcome:'Welcome', progress:'Progress', lessonsDone:'Lessons',
+    badges:'Badges', points:'Points', lastLesson:'Last Lesson', nextLesson:'Next Lesson',
+    quickAccess:'Quick Access', word:'Word', powerpoint:'PowerPoint',
+    startLearning:'Start', continueLearning:'Continue', units:'Units',
+    lesson:'Lesson', objective:'Objective', steps:'Steps', tips:'Tips',
+    mistakes:'Common Mistakes', summary:'Summary', quiz:'Quiz',
+    prev:'Previous', next:'Next', askBot:'Ask Bot',
+    markDone:'Mark Complete', done:'Done', sendMessage:'Type your question...',
+    voiceInput:'Voice Input', listen:'Listen', listenLesson:'Listen to Lesson',
+    stopAudio:'Stop', loadingAudio:'Generating Audio...',
+    newChat:'New Chat', history:'History', quizTitle:'Quiz',
+    submit:'Submit', score:'Score',
+    theme:'Theme', avatar:'Bot Avatar', botName:'Bot Name',
+    speechRate:'Speech Rate', fontSize:'Font Size', save:'Save & Close',
+    light:'Light', dark:'Dark', blue:'Blue', green:'Green', purple:'Purple',
+    noData:'No data yet', aiThinking:'Bot is thinking...', question:'Question',
+    errorOccurred:'An error occurred', copied:'Copied', sources:'Sources',
+    askAnything:'Ask me anything about Word or PowerPoint',
+    modeDesktop:'Desktop', modeLaptop:'Laptop', modeMobile:'Mobile', resetDesktop:'Back to Desktop',
+    smartVoiceTitle:'Smart Bilingual Voice (Arabic / English)',
+    ttsEngineLabel:'Speech Engine', voicePersonaLabel:'Select Voice Persona',
+    testVoiceBtn:'Test Voice Now',
+    confirmResetTitle:'Confirm Data Reset',
+    confirmResetDesc:'All saved data will be deleted. Are you sure?',
+    cancel:'Cancel', confirmYes:'Yes, Reset All'
+  }
+};
+const t = k => (I18N[state.lang] && I18N[state.lang][k]) || k;
+
+/* ═════════════════════════════════════════════════════════════════════════
+   5. HELPERS & CURRICULUM AGGREGATION
+═════════════════════════════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const esc = s => String(s||'').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+function getEffectiveProgramUnits(p){
+  const deleted = new Set(state.devStudio.deletedLessonIds || []);
+  const custom = (state.devStudio.customLessons || []).filter(cl => cl.program === p);
+  const baseUnits = CUR[p].units.map(u => ({
+    ...u,
+    lessons: u.lessons.filter(l => !deleted.has(l.id))
+  })).filter(u => u.lessons.length > 0);
+
+  if(custom.length){
+    baseUnits.push({
+      id: p + '-custom-unit',
+      icon: 'fa-sparkles',
+      color: '#7c3aed',
+      title: L('دروس إضافية من المطور', 'Developer Added Lessons'),
+      lessons: custom.map(cl => ({
+        id: cl.id,
+        icon: cl.icon || 'fa-star',
+        title: L(cl.titleAr, cl.titleEn || cl.titleAr),
+        objective: L(cl.objectiveAr || 'إتقان مهارات إضافية في البرنامج', cl.objectiveEn || cl.objectiveAr || 'Master additional skills'),
+        content: L(cl.contentAr, cl.contentEn || cl.contentAr),
+        steps: L(cl.stepsAr && cl.stepsAr.length ? cl.stepsAr : ['افتح البرنامج وطبق الخطوات المشروحة.'], cl.stepsEn && cl.stepsEn.length ? cl.stepsEn : ['Open the application and apply the steps.']),
+        tips: L(cl.tipsAr || 'تدرب على التطبيق العملي باستمرار.', cl.tipsEn || 'Practice hands-on regularly.'),
+        mistakes: L(cl.mistakesAr || 'تجاهل حفظ التعديلات.', cl.mistakesEn || 'Forgetting to save changes.'),
+        summary: L(cl.summaryAr || cl.titleAr, cl.summaryEn || cl.titleEn || cl.titleAr),
+        image: cl.image || 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=800',
+        quiz: cl.quiz || []
+      }))
+    });
+  }
+  return baseUnits;
+}
+
+function allLessons(){
+  const out = [];
+  for(const p in CUR){
+    const units = getEffectiveProgramUnits(p);
+    for(const u of units){
+      for(const l of u.lessons){
+        out.push({...l, unit:u, program:p});
+      }
+    }
+  }
+  return out;
+}
+function programLessons(p){ return allLessons().filter(l => l.program === p); }
+function findLesson(id){ return allLessons().find(l => l.id === id); }
+function totalLessons(){ return allLessons().length; }
+function progressPct(){
+  const total = totalLessons();
+  const done = state.user.completedLessons.length;
+  return total ? Math.round(done/total*100) : 0;
+}
+function toast(msg, ms=2400){
+  const el = $('#toast');
+  el.textContent = msg;
+  el.className = 'toast';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => { el.className = 'hidden'; }, ms);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   6. BILINGUAL SMART VOICE ENGINE (ARABIC / ENGLISH)
+═════════════════════════════════════════════════════════════════════════ */
+let currentAudioPlayer = null;
+const ttsCache = new Map();
+
+function base64ToArrayBuffer(base64) {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
+  return bytes.buffer;
+}
+
+function pcmToWav(pcm16, sampleRate = 24000) {
+  const numChannels = 1;
+  const byteRate = sampleRate * numChannels * 2;
+  const blockAlign = numChannels * 2;
+  const dataSize = pcm16.length * 2;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+  const writeString = (offset, string) => {
+    for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i));
+  };
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + dataSize, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, byteRate, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, 16, true);
+  writeString(36, 'data');
+  view.setUint32(40, dataSize, true);
+  let offset = 44;
+  for (let i = 0; i < pcm16.length; i++, offset += 2) view.setInt16(offset, pcm16[i], true);
+  return new Blob([buffer], { type: 'audio/wav' });
+}
+
+function stopAllAudio() {
+  if (currentAudioPlayer) {
+    currentAudioPlayer.pause();
+    currentAudioPlayer.currentTime = 0;
+    currentAudioPlayer = null;
+  }
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  const stopBtn = $('#globalStopAudioBtn');
+  if (stopBtn) {
+    stopBtn.classList.add('hidden');
+    stopBtn.classList.remove('flex');
+  }
+}
+
+function showAudioPlayingUI(show) {
+  const stopBtn = $('#globalStopAudioBtn');
+  if (!stopBtn) return;
+  if (show) {
+    stopBtn.classList.remove('hidden');
+    stopBtn.classList.add('flex');
+  } else {
+    stopBtn.classList.add('hidden');
+    stopBtn.classList.remove('flex');
+  }
+}
+
+function detectTextLanguage(text) {
+  const arMatches = (text.match(/[\u0600-\u06FF]/g) || []).length;
+  const enMatches = (text.match(/[a-zA-Z]/g) || []).length;
+  if (arMatches > enMatches) return 'ar';
+  if (enMatches > arMatches) return 'en';
+  return state.lang || 'ar';
+}
+
+async function fetchWithRetry(url, options, maxRetries = 2) {
+  let delay = 800;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok) return response;
+      if (response.status === 429 || response.status >= 500) {
+        await new Promise(r => setTimeout(r, delay));
+        delay *= 2;
+        continue;
+      }
+      return response;
+    } catch (e) {
+      if (i === maxRetries - 1) throw e;
+      await new Promise(r => setTimeout(r, delay));
+      delay *= 2;
+    }
+  }
+}
+
+async function speakText(rawText, btnEl = null, forcedLang = null) {
+  stopAllAudio();
+  const cleanText = String(rawText)
+    .replace(/[*_#`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!cleanText) return;
+  const targetLang = forcedLang || detectTextLanguage(cleanText);
+
+  if (state.settings.ttsEngine === 'browser') {
+    speakBrowserFallback(cleanText, targetLang);
+    return;
+  }
+
+  const origHtml = btnEl ? btnEl.innerHTML : null;
+  if (btnEl) {
+    btnEl.disabled = true;
+    btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('loadingAudio')}`;
+  }
+
+  const voiceName = state.settings.geminiVoiceName || 'Aoede';
+  const cacheKey = `${targetLang}::${voiceName}::${cleanText}`;
+
+  try {
+    let audioUrl = ttsCache.get(cacheKey);
+    if (!audioUrl) {
+      const apiKey = state.settings.aiKey || "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+      const promptPrefix = targetLang === 'ar'
+        ? 'اقرأ النص التعليمي التالي باللغة العربية الفصحى الواضحة والسليمة: '
+        : 'Read the following educational text clearly in fluent, articulate English: ';
+
+      const payload = {
+        contents: [{ parts: [{ text: promptPrefix + cleanText.slice(0, 1500) }] }],
+        generationConfig: {
+          responseModalities: ["AUDIO"],
+          speechConfig: {
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName } }
+          }
+        },
+        model: "gemini-2.5-flash-preview-tts"
+      };
+
+      const response = await fetchWithRetry(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response || !response.ok) throw new Error('TTS HTTP Error');
+
+      const result = await response.json();
+      const part = result?.candidates?.[0]?.content?.parts?.[0];
+      const audioData = part?.inlineData?.data;
+      const mimeType = part?.inlineData?.mimeType || 'audio/L16;rate=24000';
+      if (!audioData) throw new Error('No audio data');
+
+      const rateMatch = mimeType.match(/rate=(\d+)/);
+      const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+      const pcmData = base64ToArrayBuffer(audioData);
+      const pcm16 = new Int16Array(pcmData);
+      const wavBlob = pcmToWav(pcm16, sampleRate);
+      audioUrl = URL.createObjectURL(wavBlob);
+      ttsCache.set(cacheKey, audioUrl);
+    }
+
+    const audio = new Audio(audioUrl);
+    audio.playbackRate = state.settings.speechRate || 1.0;
+    currentAudioPlayer = audio;
+    audio.onplay = () => showAudioPlayingUI(true);
+    audio.onended = () => { showAudioPlayingUI(false); currentAudioPlayer = null; };
+    audio.onerror = () => { showAudioPlayingUI(false); speakBrowserFallback(cleanText, targetLang); };
+    await audio.play();
+  } catch (err) {
+    speakBrowserFallback(cleanText, targetLang);
+  } finally {
+    if (btnEl && origHtml) {
+      btnEl.disabled = false;
+      btnEl.innerHTML = origHtml;
+    }
+  }
+}
+
+function speakBrowserFallback(cleanText, targetLang = 'ar') {
+  if (!('speechSynthesis' in window)) {
+    toast(state.lang === 'ar' ? 'المتصفح لا يدعم النطق الصوتي' : 'TTS not supported');
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(cleanText);
+  u.lang = targetLang === 'ar' ? 'ar-SA' : 'en-US';
+  u.rate = state.settings.speechRate || 1;
+  const voices = window.speechSynthesis.getVoices();
+  const match = voices.find(v => v.lang.toLowerCase().startsWith(targetLang));
+  if (match) u.voice = match;
+  u.onstart = () => showAudioPlayingUI(true);
+  u.onend = () => showAudioPlayingUI(false);
+  u.onerror = () => showAudioPlayingUI(false);
+  window.speechSynthesis.speak(u);
+}
+
+function testBilingualVoice() {
+  state.settings.ttsEngine = $('#ttsEngine').value;
+  state.settings.geminiVoiceName = $('#geminiVoiceName').value;
+  state.settings.speechRate = parseFloat($('#speechRate').value) || 1.0;
+  const btn = $('#testVoiceBtn');
+  const sample = state.lang === 'ar'
+    ? 'مرحباً بك في منصة مُعلّم أوفيس الذكي! هذا هو المساعد الصوتي الواضح لمساعدتك في إتقان برنامجي وورد وباوربوينت.'
+    : 'Welcome to Smart Office Tutor! This is your clear voice assistant to help you master Word and PowerPoint.';
+  speakText(sample, btn, state.lang);
+}
+
+function speakCurrentLesson(btnEl) {
+  const info = findLesson(state.ctx.lessonId);
+  if (!info) return;
+  const isAr = state.lang === 'ar';
+  const textToRead = isAr
+    ? `درس: ${tL(info.title)}. الهدف: ${tL(info.objective)}. الشرح: ${tL(info.content)}. الخطوات العملية: ${tL(info.steps).join('. ')}.`
+    : `Lesson: ${tL(info.title)}. Objective: ${tL(info.objective)}. Explanation: ${tL(info.content)}. Practical steps: ${tL(info.steps).join('. ')}.`;
+  speakText(textToRead, btnEl, isAr ? 'ar' : 'en');
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   7. THEME / LANGUAGE / VIEWPORT SWITCHER
+═════════════════════════════════════════════════════════════════════════ */
+const THEMES = ['light','dark','blue','green','purple'];
+function applyTheme(name){
+  state.theme = name;
+  if(name === 'light') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', name);
+  saveState();
+  const icon = $('#themeIcon');
+  if(icon) icon.className = name === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+function cycleTheme(){
+  const i = THEMES.indexOf(state.theme);
+  applyTheme(THEMES[(i+1) % THEMES.length]);
+}
+function toggleLanguage(){
+  stopAllAudio();
+  state.lang = state.lang === 'ar' ? 'en' : 'ar';
+  document.documentElement.lang = state.lang;
+  document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+  $('#langLabel').textContent = state.lang === 'ar' ? 'EN' : 'ع';
+  const brand = $('#brand');
+  if(brand) brand.textContent = state.lang === 'ar' ? 'مُعلّم أوفيس الذكي' : 'Smart Office Tutor';
+  saveState();
+  setViewMode(state.viewMode, true);
+  renderNav();
+  render();
+}
+
+function setViewMode(mode, silent = false){
+  state.viewMode = mode;
+  saveState();
+  const frame = $('#appFrame');
+  const laptopBase = $('#laptopBase');
+  const banner = $('#viewportBanner');
+  const bannerIcon = $('#viewportBannerIcon');
+  const bannerText = $('#viewportBannerText');
+
+  if(frame) frame.className = 'app-frame ' + mode;
+
+  if(mode === 'laptop'){
+    laptopBase?.classList.remove('hidden');
+    banner?.classList.remove('hidden');
+    if(bannerIcon) bannerIcon.className = 'fas fa-laptop text-blue-500';
+    if(bannerText) bannerText.textContent = state.lang === 'ar' ? 'معاينة وضع اللابتوب (1024px)' : 'Laptop Mode Preview (1024px)';
+  } else if(mode === 'mobile'){
+    laptopBase?.classList.add('hidden');
+    banner?.classList.remove('hidden');
+    if(bannerIcon) bannerIcon.className = 'fas fa-mobile-screen-button text-blue-500';
+    if(bannerText) bannerText.textContent = state.lang === 'ar' ? 'معاينة وضع الموبايل (390px)' : 'Mobile Mode Preview (390px)';
+  } else {
+    laptopBase?.classList.add('hidden');
+    banner?.classList.add('hidden');
+  }
+
+  const sidebar = $('#sidebar');
+  if(sidebar && state.auth.loggedIn){
+    if(mode === 'mobile'){
+      sidebar.classList.add('hidden');
+      sidebar.classList.remove('lg:block');
+    } else {
+      sidebar.classList.add('lg:block');
+    }
+  }
+
+  $$('.view-btn').forEach(b => {
+    if(b.dataset.mode === mode) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+
+  if(!silent){
+    const labels = {
+      desktop: state.lang === 'ar' ? 'وضع الكمبيوتر' : 'Desktop Mode',
+      laptop: state.lang === 'ar' ? 'وضع اللابتوب' : 'Laptop Mode',
+      mobile: state.lang === 'ar' ? 'وضع الموبايل' : 'Mobile Mode'
+    };
+    toast(labels[mode]);
+  }
+}
+
+function toggleSidebar(){
+  const sb = $('#sidebar');
+  sb.classList.toggle('hidden');
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   8. SPLASH & AUTHENTICATION SCREENS
+═════════════════════════════════════════════════════════════════════════ */
+function viewSplash(){
+  const isAr = state.lang === 'ar';
+  const title = isAr ? state.devStudio.welcomeTitleAr : state.devStudio.welcomeTitleEn;
+  const desc = isAr ? state.devStudio.welcomeDescAr : state.devStudio.welcomeDescEn;
+  return `
+    <div class="h-full flex flex-col items-center justify-center text-center px-4 py-4">
+      <div class="surface rounded-3xl p-6 sm:p-9 max-w-lg w-full shadow-xl border-2 border-blue-400/30">
+        <!-- Cute Animated Robot SVG -->
+        <div class="w-32 h-32 mx-auto mb-4 rounded-3xl flex items-center justify-center shadow-lg robot-float" style="background:var(--primary-soft);">
+          <svg viewBox="0 0 140 130" class="w-28 h-28">
+            <!-- Antenna -->
+            <line x1="70" y1="12" x2="70" y2="28" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="70" cy="10" r="6" fill="#f59e0b" class="robot-antenna"/>
+            <!-- Ears -->
+            <rect x="26" y="46" width="8" height="20" rx="4" fill="#60a5fa"/>
+            <rect x="106" y="46" width="8" height="20" rx="4" fill="#60a5fa"/>
+            <!-- Head -->
+            <rect x="34" y="28" width="72" height="54" rx="18" fill="#2563eb"/>
+            <!-- Screen Face -->
+            <rect x="42" y="37" width="56" height="34" rx="11" fill="#0f172a"/>
+            <!-- Eyes -->
+            <circle cx="57" cy="51" r="6" fill="#38bdf8" class="robot-eye"/>
+            <circle cx="83" cy="51" r="6" fill="#38bdf8" class="robot-eye"/>
+            <circle cx="59" cy="49" r="2" fill="#ffffff"/>
+            <circle cx="85" cy="49" r="2" fill="#ffffff"/>
+            <!-- Cute Smile -->
+            <path d="M 58 62 Q 70 70 82 62" stroke="#38bdf8" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <!-- Cheeks -->
+            <circle cx="49" cy="59" r="3.5" fill="#f472b6" opacity="0.7"/>
+            <circle cx="91" cy="59" r="3.5" fill="#f472b6" opacity="0.7"/>
+            <!-- Waving Left Arm -->
+            <g class="robot-arm-wave">
+              <rect x="14" y="76" width="12" height="26" rx="6" fill="#3b82f6"/>
+              <circle cx="20" cy="74" r="6" fill="#f59e0b"/>
+            </g>
+            <!-- Right Arm -->
+            <rect x="114" y="84" width="12" height="24" rx="6" fill="#3b82f6"/>
+            <!-- Body -->
+            <rect x="46" y="85" width="48" height="30" rx="10" fill="#1d4ed8"/>
+            <rect x="57" y="92" width="26" height="14" rx="5" fill="#93c5fd"/>
+          </svg>
+        </div>
+
+        <h1 class="text-2xl sm:text-3xl font-extrabold mb-2">${esc(title)}</h1>
+        <p class="text-muted text-sm sm:text-base mb-6 leading-relaxed">${esc(desc)}</p>
+
+        <div class="flex flex-col sm:flex-row gap-2.5 justify-center">
+          <button onclick="goToRoleSelect()" class="btn-primary px-9 py-3.5 rounded-2xl font-extrabold text-base shadow-lg flex items-center justify-center gap-2">
+            <i class="fas fa-play"></i>
+            <span>${isAr ? 'بدء' : 'Start'}</span>
+          </button>
+          <button onclick="toggleLanguage()" class="btn-soft px-4 py-3.5 rounded-2xl font-bold text-sm">
+            <i class="fas fa-language"></i> ${isAr ? 'English' : 'العربية'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function goToRoleSelect(){
+  state.page = 'role_select';
+  saveState();
+  render();
+}
+
+function viewRoleSelect(){
+  const isAr = state.lang === 'ar';
+  return `
+    <div class="h-full flex flex-col items-center justify-center text-center px-4 py-4">
+      <div class="surface rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-xl">
+        <div class="text-5xl mb-3">${state.settings.avatar}</div>
+        <h2 class="text-xl sm:text-2xl font-extrabold mb-1">${isAr ? 'تسجيل الدخول' : 'Sign In'}</h2>
+        <p class="text-muted text-sm mb-6">${isAr ? 'هل أنت مستخدم أم مطور؟' : 'Are you a User or a Developer?'}</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button onclick="selectRole('user')" class="p-5 rounded-2xl border-2 text-center card-hover hover:border-blue-500 transition-all" style="background:var(--bg);border-color:var(--border);">
+            <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="font-extrabold text-base">${isAr ? 'مستخدم' : 'User'}</div>
+            <div class="text-xs text-muted mt-1">${isAr ? 'الدخول للتعلم والتدريب والاختبارات' : 'Access lessons, labs & quizzes'}</div>
+          </button>
+
+          <button onclick="selectRole('developer')" class="p-5 rounded-2xl border-2 text-center card-hover hover:border-amber-500 transition-all" style="background:var(--bg);border-color:var(--border);">
+            <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl">
+              <i class="fas fa-code"></i>
+            </div>
+            <div class="font-extrabold text-base">${isAr ? 'مطور' : 'Developer'}</div>
+            <div class="text-xs text-muted mt-1">${isAr ? 'لوحة المطور والإدارة وتغذية الدروس' : 'Developer hub, admin & lesson studio'}</div>
+          </button>
+        </div>
+
+        <button onclick="state.page='splash';saveState();render()" class="mt-5 text-xs text-muted hover:underline">
+          <i class="fas fa-arrow-${isAr?'right':'left'}"></i> ${isAr ? 'العودة للواجهة الترحيبية' : 'Back to Welcome'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function viewUserLogin(){
+  const isAr = state.lang === 'ar';
+  return `
+    <div class="h-full flex flex-col items-center justify-center px-4 py-4">
+      <div class="surface rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-xl text-center">
+        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl">
+          <i class="fas fa-user-pen"></i>
+        </div>
+        <h2 class="text-xl font-extrabold mb-1">${isAr ? 'أهلاً بك يا بطل!' : 'Welcome Learner!'}</h2>
+        <p class="text-muted text-sm mb-5">${isAr ? 'يرجى تسجيل اسمك للبدء في رحلتك التعليمية' : 'Please enter your name to start learning'}</p>
+        <input id="userNameInput" type="text" value="${state.user.name !== 'طالب' ? esc(state.user.name) : ''}" placeholder="${isAr ? 'اكتب اسمك هنا...' : 'Enter your name...'}"
+          class="w-full surface rounded-xl px-4 py-3 text-sm mb-4 text-center font-bold"
+          onkeypress="if(event.key==='Enter') submitUserLogin()" />
+        <button onclick="submitUserLogin()" class="btn-primary w-full py-3 rounded-xl font-extrabold text-sm">
+          <i class="fas fa-door-open me-1"></i> ${isAr ? 'دخول للتطبيق' : 'Enter App'}
+        </button>
+        <button onclick="goToRoleSelect()" class="mt-4 text-xs text-muted hover:underline block mx-auto">
+          ${isAr ? 'تغيير نوع الحساب' : 'Change Role'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function viewDevLogin(){
+  const isAr = state.lang === 'ar';
+  return `
+    <div class="h-full flex flex-col items-center justify-center px-4 py-4">
+      <div class="surface rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-xl text-center">
+        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl">
+          <i class="fas fa-shield-halved"></i>
+        </div>
+        <h2 class="text-xl font-extrabold mb-1">${isAr ? 'تسجيل دخول المطور' : 'Developer Login'}</h2>
+        <p class="text-muted text-sm mb-5">${isAr ? 'أدخل اسم المستخدم وكلمة المرور الخاصة بالمطور' : 'Enter developer username and password'}</p>
+        <div id="devLoginError" class="hidden p-3 rounded-xl text-xs font-bold mb-3 bg-red-100 text-red-700"></div>
+        <div class="space-y-3 text-start mb-4">
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr ? 'اسم المستخدم (Username)' : 'Username'}</label>
+            <input id="devUserInput" type="text" placeholder="Rahma" class="w-full surface rounded-xl px-3.5 py-2.5 text-sm" onkeypress="if(event.key==='Enter') verifyDevLogin()" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr ? 'كلمة المرور (Password)' : 'Password'}</label>
+            <input id="devPassInput" type="password" placeholder="•••••" class="w-full surface rounded-xl px-3.5 py-2.5 text-sm" onkeypress="if(event.key==='Enter') verifyDevLogin()" />
+          </div>
+        </div>
+        <button onclick="verifyDevLogin()" class="btn-primary w-full py-3 rounded-xl font-extrabold text-sm">
+          <i class="fas fa-lock-open me-1"></i> ${isAr ? 'دخول لوحة المطور' : 'Login as Developer'}
+        </button>
+        <button onclick="goToRoleSelect()" class="mt-4 text-xs text-muted hover:underline block mx-auto">
+          ${isAr ? 'تغيير نوع الحساب' : 'Change Role'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function selectRole(role){
+  state.page = role === 'user' ? 'user_login' : 'dev_login';
+  saveState();
+  render();
+}
+
+function submitUserLogin(){
+  const nameVal = ($('#userNameInput')?.value || '').trim();
+  if(!nameVal){
+    toast(state.lang==='ar' ? 'من فضلك أدخل اسمك أولاً' : 'Please enter your name first');
+    return;
+  }
+  state.auth.role = 'user';
+  state.auth.loggedIn = true;
+  state.user.name = nameVal;
+  state.page = 'dashboard';
+  saveState();
+  $('#topbar').classList.remove('hidden');
+  $('#sidebar').classList.remove('hidden');
+  renderNav();
+  render();
+}
+
+function verifyDevLogin(){
+  const uInput = ($('#devUserInput')?.value || '').trim();
+  const pInput = ($('#devPassInput')?.value || '').trim();
+  const errBox = $('#devLoginError');
+  const expectedUser = state.auth.devUsername || 'Rahma';
+  const expectedPass = state.auth.devPassword || '12345';
+
+  if(uInput === expectedUser && pInput === expectedPass){
+    state.auth.role = 'developer';
+    state.auth.loggedIn = true;
+    state.user.name = expectedUser;
+    state.page = 'dashboard';
+    saveState();
+    $('#topbar').classList.remove('hidden');
+    $('#sidebar').classList.remove('hidden');
+    toast(state.lang==='ar' ? 'تم تسجيل دخول المطور بنجاح ✓' : 'Developer logged in ✓');
+    renderNav();
+    render();
+  } else {
+    if(errBox){
+      errBox.textContent = state.lang==='ar'
+        ? 'اسم المستخدم أو كلمة المرور غير صحيحة! يرجى التحقق من البيانات.'
+        : 'Invalid username or password! Please check your credentials.';
+      errBox.classList.remove('hidden');
+    }
+    toast(state.lang==='ar' ? 'بيانات الدخول غير صحيحة' : 'Invalid credentials');
+  }
+}
+
+function logoutToRoleSelect(){
+  stopAllAudio();
+  state.auth.loggedIn = false;
+  state.auth.role = null;
+  state.page = 'role_select';
+  saveState();
+  $('#topbar').classList.add('hidden');
+  $('#sidebar').classList.add('hidden');
+  render();
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   9. NAVIGATION (SEPARATED FOR USER VS DEVELOPER)
+═════════════════════════════════════════════════════════════════════════ */
+const PAGES = [
+  {id:'dashboard', icon:'fa-home', color:'#2563eb', labelAr:'الرئيسية', labelEn:'Dashboard', devOnly:false},
+  {id:'learning', icon:'fa-graduation-cap', color:'#16a34a', labelAr:'مركز التعلم', labelEn:'Learning', devOnly:false, userOnly:true},
+  {id:'chatbot', icon:'fa-comments', color:'#7c3aed', labelAr:'اسأل الروبوت', labelEn:'Ask Bot', devOnly:false, userOnly:true},
+  {id:'lab', icon:'fa-flask', color:'#0891b2', labelAr:'مساحة التدريب', labelEn:'Practice Lab', devOnly:false, userOnly:true},
+  {id:'quizzes', icon:'fa-clipboard-check', color:'#d97706', labelAr:'الاختبارات', labelEn:'Quizzes', devOnly:false, userOnly:true},
+  {id:'skills', icon:'fa-lightbulb', color:'#eab308', labelAr:'المهارات', labelEn:'Skills', devOnly:false, userOnly:true},
+  {id:'library', icon:'fa-folder-open', color:'#2563eb', labelAr:'مكتبتي', labelEn:'Library', devOnly:false, userOnly:true},
+  {id:'profile', icon:'fa-user-gear', color:'#db2777', labelAr:'ملفي', labelEn:'Profile', devOnly:false},
+  {id:'admin', icon:'fa-shield-halved', color:'#dc2626', labelAr:'الإدارة', labelEn:'Admin', devOnly:true}
+];
+
+function getVisiblePages(){
+  const isDev = state.auth.role === 'developer';
+  const hidden = state.devStudio.hiddenTabs || [];
+  const overrides = state.devStudio.tabOverrides || {};
+
+  const basePages = PAGES.filter(p => {
+    if(isDev){
+      if(p.userOnly) return false;
+      return true;
+    } else {
+      if(p.devOnly) return false;
+      if(hidden.includes(p.id)) return false;
+      return true;
+    }
+  }).map(p => {
+    const ov = overrides[p.id] || {};
+    const defaultDevLabelAr = p.id === 'dashboard' ? 'لوحة المطور' : (p.id === 'profile' ? 'ملف المطور' : p.labelAr);
+    const defaultDevLabelEn = p.id === 'dashboard' ? 'Dev Home' : (p.id === 'profile' ? 'Dev Profile' : p.labelEn);
+    return {
+      ...p,
+      icon: ov.icon || (isDev && p.id === 'dashboard' ? 'fa-gauge-high' : (isDev && p.id === 'profile' ? 'fa-user-shield' : p.icon)),
+      color: ov.color || p.color,
+      labelAr: ov.labelAr || (isDev ? defaultDevLabelAr : p.labelAr),
+      labelEn: ov.labelEn || (isDev ? defaultDevLabelEn : p.labelEn)
+    };
+  });
+
+  if(isDev){
+    const custom = (state.devStudio.customTabs || []).map(ct => ({
+      id: ct.id,
+      icon: ct.icon || 'fa-layer-group',
+      color: ct.color || '#2563eb',
+      labelAr: ct.labelAr,
+      labelEn: ct.labelEn,
+      devOnly: true,
+      isCustom: true,
+      contentAr: ct.contentAr,
+      contentEn: ct.contentEn
+    }));
+    return [...basePages, ...custom];
+  }
+  return basePages;
+}
+
+function getPageLabel(p){
+  return state.lang === 'ar' ? p.labelAr : p.labelEn;
+}
+
+function renderNav(){
+  const nav = $('#navLinks');
+  if(!nav) return;
+  const visible = getVisiblePages();
+  const isDev = state.auth.role === 'developer';
+
+  if(isDev && !visible.some(p => p.id === state.page)){
+    state.page = 'dashboard';
+  }
+
+  nav.innerHTML = visible.map(p => `
+    <a href="#" onclick="navigate('${p.id}');return false;"
+       class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/60 ${state.page === p.id ? 'active' : ''}">
+      <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0" style="background:${p.color}18;color:${p.color};">
+        <i class="fas ${p.icon}"></i>
+      </span>
+      <span class="text-sm flex-1">${esc(getPageLabel(p))}</span>
+      ${isDev ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold"><i class="fas fa-code"></i></span>` : ''}
+    </a>
+  `).join('') + (isDev ? `
+    <div class="pt-3 mt-3 border-t space-y-1" style="border-color:var(--border);">
+      <a href="#" onclick="openEmbed();return false;" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/60 text-sm">
+        <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 bg-indigo-100 text-indigo-600">
+          <i class="fas fa-code"></i>
+        </span>
+        <span>${t('embedCode')}</span>
+      </a>
+    </div>
+  ` : '') + `
+    <div class="pt-3 mt-3 border-t" style="border-color:var(--border);">
+      <button onclick="logoutToRoleSelect()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 font-bold">
+        <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 bg-red-100 text-red-600">
+          <i class="fas fa-right-from-bracket"></i>
+        </span>
+        <span>${t('switchRole')}</span>
+      </button>
+    </div>
+  `;
+}
+
+function navigate(page){
+  const isDev = state.auth.role === 'developer';
+  const visible = getVisiblePages();
+  const allowed = isDev
+    ? visible.some(p => p.id === page)
+    : (visible.some(p => p.id === page) || page === 'lesson');
+  state.page = allowed ? page : 'dashboard';
+  saveState();
+  renderNav();
+  render();
+  const frame = $('#appFrame');
+  if(frame) frame.scrollTop = 0;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   10. RENDER ROUTER
+═════════════════════════════════════════════════════════════════════════ */
+function render(){
+  document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+  $$('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if(val) el.textContent = val;
+  });
+
+  const c = $('#pageContent');
+  if(!c) return;
+
+  if(state.page === 'splash'){ c.innerHTML = viewSplash(); return; }
+  if(state.page === 'role_select'){ c.innerHTML = viewRoleSelect(); return; }
+  if(state.page === 'user_login'){ c.innerHTML = viewUserLogin(); return; }
+  if(state.page === 'dev_login'){ c.innerHTML = viewDevLogin(); return; }
+
+  const isDev = state.auth.role === 'developer';
+  const customTab = (state.devStudio.customTabs || []).find(ct => ct.id === state.page);
+  if(customTab && isDev){
+    c.innerHTML = viewCustomDevTab(customTab);
+    return;
+  }
+
+  if(isDev){
+    switch(state.page){
+      case 'dashboard': c.innerHTML = viewDevDashboard(); break;
+      case 'profile': c.innerHTML = viewDevProfile(); break;
+      case 'admin': c.innerHTML = viewAdmin(); break;
+      default: c.innerHTML = viewDevDashboard();
+    }
+    return;
+  }
+
+  switch(state.page){
+    case 'dashboard': c.innerHTML = viewDashboard(); break;
+    case 'learning': c.innerHTML = viewLearning(); break;
+    case 'lesson': c.innerHTML = viewLesson(); break;
+    case 'chatbot': c.innerHTML = viewChatbot(); setTimeout(initChat, 50); break;
+    case 'lab': c.innerHTML = viewLab(); break;
+    case 'quizzes': c.innerHTML = viewQuizzes(); break;
+    case 'skills': c.innerHTML = viewSkills(); break;
+    case 'library': c.innerHTML = viewLibrary(); break;
+    case 'profile': c.innerHTML = viewProfile(); break;
+    default: c.innerHTML = viewDashboard();
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   11. DEVELOPER-ONLY VIEWS (HOME, PROFILE, ADMIN STUDIO, CUSTOM TABS)
+═════════════════════════════════════════════════════════════════════════ */
+function statCard(icon, val, label, color){
+  return `<div class="surface rounded-2xl p-4 card-hover">
+    <div class="flex items-center gap-2 mb-1"><i class="fas ${icon}" style="color:${color};"></i><span class="text-xs sm:text-sm text-muted">${label}</span></div>
+    <div class="text-xl sm:text-2xl font-bold">${val}</div>
+  </div>`;
+}
+
+function viewDevDashboard(){
+  const allL = allLessons();
+  const effKB = getEffectiveKB();
+  const filesCount = state.user.files.length;
+  const devTabsCount = getVisiblePages().length;
+  const isAr = state.lang === 'ar';
+
+  return `
+    <div class="space-y-4">
+      <div class="surface rounded-2xl p-5 border-2 border-amber-400/30">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-inner" style="background:var(--primary-soft);">
+              ${state.settings.avatar}
+            </div>
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 mb-1">
+                <i class="fas fa-code-branch"></i>
+                <span>${isAr ? 'لوحة المطور الرئيسية' : 'Developer Main Hub'}</span>
+              </div>
+              <h1 class="text-xl font-extrabold flex items-center gap-2">
+                <i class="fas fa-user-shield text-amber-600"></i>
+                <span>${isAr ? 'مرحباً بالمطور' : 'Welcome Developer'}, ${esc(state.auth.devUsername || 'Rahma')}</span>
+              </h1>
+              <p class="text-muted text-xs sm:text-sm">${isAr ? 'إدارة كاملة للمنصة، تغذية الدروس والشات بوت، ملفات المستخدمين، والتبويبات المخصصة.' : 'Full platform management, lessons & bot KB feeding, user files, and custom tabs.'}</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="openEmbed()" class="btn-soft px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5">
+              <i class="fas fa-code text-indigo-600"></i>
+              <span>${t('embedCode')}</span>
+            </button>
+            <button onclick="navigate('admin')" class="btn-primary px-4 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5">
+              <i class="fas fa-sliders"></i>
+              <span>${isAr ? 'استوديو الإدارة والتطوير' : 'Dev Studio'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        ${statCard('fa-book-open', allL.length, isAr ? 'إجمالي الدروس الفعالة' : 'Active Lessons', '#2563eb')}
+        ${statCard('fa-brain', effKB.length, isAr ? 'عناصر معرفة الشات بوت' : 'Bot KB Entries', '#7c3aed')}
+        ${statCard('fa-folder-open', filesCount, isAr ? 'ملفات المستخدمين' : 'User Files', '#0891b2')}
+        ${statCard('fa-layer-group', devTabsCount, isAr ? 'تبويبات المطور' : 'Dev Tabs', '#d97706')}
+      </div>
+
+      <div class="surface rounded-2xl p-4">
+        <h2 class="font-bold text-sm sm:text-base mb-3 flex items-center gap-2">
+          <i class="fas fa-toolbox text-blue-600"></i>
+          <span>${isAr ? 'أدوات المطور السريعة' : 'Developer Quick Modules'}</span>
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <button onclick="navigate('admin');setTimeout(()=>switchDevTab('lessons'),60)" class="p-4 rounded-xl text-start card-hover border" style="background:var(--bg);border-color:var(--border);">
+            <div class="flex items-center gap-3 mb-1.5">
+              <span class="w-9 h-9 rounded-lg flex items-center justify-center bg-blue-100 text-blue-700"><i class="fas fa-book-medical"></i></span>
+              <span class="font-bold text-sm">${isAr ? 'إضافة وتغذية الدروس' : 'Add & Feed Lessons'}</span>
+            </div>
+            <p class="text-xs text-muted">${isAr ? 'إضافة دروس Word و PowerPoint وتغذية الشات بوت بها تلقائياً.' : 'Add Word/PowerPoint lessons and auto-feed the chatbot.'}</p>
+          </button>
+
+          <button onclick="navigate('admin');setTimeout(()=>switchDevTab('files'),60)" class="p-4 rounded-xl text-start card-hover border" style="background:var(--bg);border-color:var(--border);">
+            <div class="flex items-center gap-3 mb-1.5">
+              <span class="w-9 h-9 rounded-lg flex items-center justify-center bg-cyan-100 text-cyan-700"><i class="fas fa-file-arrow-down"></i></span>
+              <span class="font-bold text-sm">${isAr ? 'ملفات المستخدمين المرفوعة' : 'Uploaded User Files'}</span>
+            </div>
+            <p class="text-xs text-muted">${isAr ? 'استعراض ومراجعة وتنزيل الملفات التي رفعها المستخدمون.' : 'Inspect, review, and download files uploaded by users.'}</p>
+          </button>
+
+          <button onclick="navigate('admin');setTimeout(()=>switchDevTab('tabs'),60)" class="p-4 rounded-xl text-start card-hover border" style="background:var(--bg);border-color:var(--border);">
+            <div class="flex items-center gap-3 mb-1.5">
+              <span class="w-9 h-9 rounded-lg flex items-center justify-center bg-purple-100 text-purple-700"><i class="fas fa-table-columns"></i></span>
+              <span class="font-bold text-sm">${isAr ? 'إدارة وإضافة التبويبات' : 'Manage & Add Tabs'}</span>
+            </div>
+            <p class="text-xs text-muted">${isAr ? 'إنشاء تبويبات جديدة، تعديل الأسماء والأيقونات، والتحكم بالظهور.' : 'Create custom tabs, edit labels/icons, and control visibility.'}</p>
+          </button>
+
+          <button onclick="navigate('admin');setTimeout(()=>switchDevTab('texts'),60)" class="p-4 rounded-xl text-start card-hover border" style="background:var(--bg);border-color:var(--border);">
+            <div class="flex items-center gap-3 mb-1.5">
+              <span class="w-9 h-9 rounded-lg flex items-center justify-center bg-emerald-100 text-emerald-700"><i class="fas fa-pen-to-square"></i></span>
+              <span class="font-bold text-sm">${isAr ? 'تعديل النصوص والصور' : 'Edit Texts & Images'}</span>
+            </div>
+            <p class="text-xs text-muted">${isAr ? 'تحديث نصوص الترحيب والهوية وصور الدروس بشكل فوري.' : 'Update welcome texts, brand identity, and lesson images.'}</p>
+          </button>
+
+          <button onclick="navigate('profile')" class="p-4 rounded-xl text-start card-hover border" style="background:var(--bg);border-color:var(--border);">
+            <div class="flex items-center gap-3 mb-1.5">
+              <span class="w-9 h-9 rounded-lg flex items-center justify-center bg-pink-100 text-pink-700"><i class="fas fa-user-lock"></i></span>
+              <span class="font-bold text-sm">${isAr ? 'ملفي وأمان المطور' : 'My Dev Profile & Security'}</span>
+            </div>
+            <p class="text-xs text-muted">${isAr ? 'تغيير اسم المطور، كلمة المرور، وشكل الروبوت.' : 'Change developer name, password, and robot avatar.'}</p>
+          </button>
+
+          <button onclick="openEmbed()" class="p-4 rounded-xl text-start card-hover border" style="background:var(--bg);border-color:var(--border);">
+            <div class="flex items-center gap-3 mb-1.5">
+              <span class="w-9 h-9 rounded-lg flex items-center justify-center bg-amber-100 text-amber-700"><i class="fas fa-window-restore"></i></span>
+              <span class="font-bold text-sm">${isAr ? 'تضمين التطبيق' : 'App Embed Code'}</span>
+            </div>
+            <p class="text-xs text-muted">${isAr ? 'توليد ونسخ كود التضمين للمواقع الخارجية.' : 'Generate and copy iframe embed code for external sites.'}</p>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function viewDevProfile(){
+  const isAr = state.lang === 'ar';
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <div class="surface rounded-2xl p-5">
+        <div class="flex flex-col sm:flex-row items-center gap-4">
+          <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-5xl shadow-inner" style="background:var(--primary-soft);">
+            ${state.settings.avatar}
+          </div>
+          <div class="text-center sm:text-start flex-1">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 mb-1">
+              <i class="fas fa-crown"></i> ${isAr ? 'حساب مطور معتمد' : 'Verified Developer'}
+            </span>
+            <h1 class="text-xl font-extrabold">${esc(state.auth.devUsername || 'Rahma')}</h1>
+            <p class="text-xs text-muted">${isAr ? 'إدارة بيانات حساب المطور، كلمة المرور، وشكل الروبوت التفاعلي.' : 'Manage developer account details, password, and robot avatar.'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="surface rounded-2xl p-4 space-y-3">
+          <h3 class="font-bold text-sm flex items-center gap-2">
+            <i class="fas fa-key text-amber-600"></i>
+            <span>${isAr ? 'الاسم وكلمة المرور وتغييرها' : 'Name, Password & Change Password'}</span>
+          </h3>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr ? 'اسم المطور (Username)' : 'Developer Username'}</label>
+            <input id="devProfileName" value="${esc(state.auth.devUsername || 'Rahma')}" class="w-full surface rounded-lg px-3 py-2 text-sm" />
+          </div>
+
+          <div class="p-3 rounded-xl border text-xs flex items-center justify-between" style="background:var(--bg);border-color:var(--border);">
+            <span class="text-muted"><i class="fas fa-lock me-1"></i>${isAr ? 'كلمة المرور الحالية:' : 'Current Password:'}</span>
+            <span id="currentDevPassDisplay" class="font-mono font-bold">•••••</span>
+            <button type="button" onclick="toggleDevPassVisibility()" class="text-blue-600 font-bold hover:underline">
+              <i class="fas fa-eye"></i> ${isAr ? 'إظهار' : 'Show'}
+            </button>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr ? 'كلمة المرور الجديدة' : 'New Password'}</label>
+            <input id="devNewPass" type="password" placeholder="${isAr ? 'أدخل كلمة المرور الجديدة' : 'Enter new password'}" class="w-full surface rounded-lg px-3 py-2 text-sm" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr ? 'تأكيد كلمة المرور الجديدة' : 'Confirm New Password'}</label>
+            <input id="devConfirmPass" type="password" placeholder="${isAr ? 'أعد إدخال كلمة المرور الجديدة' : 'Re-enter new password'}" class="w-full surface rounded-lg px-3 py-2 text-sm" />
+          </div>
+
+          <button type="button" onclick="saveDevProfileCredentials()" class="btn-primary w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+            <i class="fas fa-floppy-disk"></i>
+            <span>${isAr ? 'حفظ الاسم وتحديث الباسورد' : 'Save Name & Update Password'}</span>
+          </button>
+        </div>
+
+        <div class="surface rounded-2xl p-4 space-y-3">
+          <h3 class="font-bold text-sm flex items-center gap-2">
+            <i class="fas fa-robot text-blue-600"></i>
+            <span>${isAr ? 'شكل الروبوت وهوية المساعد' : 'Robot Avatar & Assistant Identity'}</span>
+          </h3>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr ? 'اسم الروبوت' : 'Robot Name'}</label>
+            <input id="devBotNameInput" value="${esc(state.settings.botName)}" class="w-full surface rounded-lg px-3 py-2 text-sm" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1.5">${isAr ? 'اختر شكل الروبوت' : 'Choose Robot Avatar'}</label>
+            <div class="grid grid-cols-6 gap-2">
+              ${['🤖','👨‍🏫','👩‍🏫','🦉','🐱','🚀'].map(av => `
+                <button type="button" onclick="selectDevRobotAvatar('${av}')" class="avatar-opt text-2xl p-2 rounded-xl border ${state.settings.avatar===av?'selected':''}" style="border-color:var(--border);">
+                  ${av}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <button type="button" onclick="saveDevBotIdentity()" class="btn-soft w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+            <i class="fas fa-check-circle"></i>
+            <span>${isAr ? 'حفظ شكل واسم الروبوت' : 'Save Robot Avatar & Name'}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleDevPassVisibility(){
+  const el = $('#currentDevPassDisplay');
+  if(!el) return;
+  const actual = state.auth.devPassword || '12345';
+  el.textContent = el.textContent === '•••••' ? actual : '•••••';
+}
+
+function saveDevProfileCredentials(){
+  const nameVal = ($('#devProfileName')?.value || '').trim();
+  const newPass = ($('#devNewPass')?.value || '').trim();
+  const confPass = ($('#devConfirmPass')?.value || '').trim();
+  const isAr = state.lang === 'ar';
+
+  if(!nameVal){
+    toast(isAr ? 'يرجى إدخال اسم المطور' : 'Please enter developer name');
+    return;
+  }
+  if(newPass || confPass){
+    if(newPass.length < 3){
+      toast(isAr ? 'كلمة المرور قصيرة جداً' : 'Password is too short');
+      return;
+    }
+    if(newPass !== confPass){
+      toast(isAr ? 'كلمتا المرور غير متطابقتين!' : 'Passwords do not match!');
+      return;
+    }
+    state.auth.devPassword = newPass;
+  }
+  state.auth.devUsername = nameVal;
+  state.user.name = nameVal;
+  saveState();
+  toast(isAr ? 'تم حفظ بيانات المطور وتحديث كلمة المرور ✓' : 'Developer profile & password updated ✓');
+  render();
+}
+
+function selectDevRobotAvatar(av){
+  state.settings.avatar = av;
+  saveState();
+  toast(state.lang==='ar' ? 'تم تغيير شكل الروبوت' : 'Robot avatar updated');
+  render();
+}
+
+function saveDevBotIdentity(){
+  const bName = ($('#devBotNameInput')?.value || '').trim();
+  if(bName) state.settings.botName = bName;
+  saveState();
+  toast(state.lang==='ar' ? 'تم حفظ اسم وشكل الروبوت ✓' : 'Robot name & avatar saved ✓');
+  render();
+}
+
+function viewCustomDevTab(ct){
+  const isAr = state.lang === 'ar';
+  const body = isAr ? (ct.contentAr || '') : (ct.contentEn || ct.contentAr || '');
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <div class="surface rounded-2xl p-5">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" style="background:${ct.color||'#2563eb'}20;color:${ct.color||'#2563eb'};">
+              <i class="fas ${ct.icon||'fa-layer-group'}"></i>
+            </span>
+            <div>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">${isAr ? 'تبويب مخصص للمطور' : 'Custom Dev Tab'}</span>
+              <h1 class="text-xl font-extrabold mt-0.5">${esc(isAr ? ct.labelAr : (ct.labelEn || ct.labelAr))}</h1>
+            </div>
+          </div>
+          <button onclick="navigate('admin');setTimeout(()=>switchDevTab('tabs'),60)" class="btn-soft px-3 py-1.5 rounded-lg text-xs font-bold">
+            <i class="fas fa-pen"></i> ${isAr ? 'تعديل التبويب' : 'Edit Tab'}
+          </button>
+        </div>
+        <div class="p-4 rounded-xl border text-sm leading-relaxed whitespace-pre-wrap" style="background:var(--bg);border-color:var(--border);">
+          ${esc(body || (isAr ? 'لا يوجد محتوى مضاف لهذا التبويب بعد.' : 'No content added to this tab yet.'))}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   12. DEVELOPER STUDIO (ADMIN VIEW)
+═════════════════════════════════════════════════════════════════════════ */
+let activeDevSubTab = 'lessons';
+function switchDevTab(tab){
+  activeDevSubTab = tab;
+  render();
+}
+
+function viewAdmin(){
+  const isAr = state.lang === 'ar';
+  const allL = allLessons();
+  return `
+    <div class="space-y-4 max-w-5xl mx-auto">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h1 class="text-xl sm:text-2xl font-extrabold flex items-center gap-2">
+          <i class="fas fa-shield-halved text-red-600"></i>
+          <span>${isAr ? 'استوديو الإدارة وتطوير المنصة' : 'Platform Admin & Dev Studio'}</span>
+        </h1>
+        <div class="flex flex-wrap gap-1.5">
+          <button onclick="switchDevTab('lessons')" class="px-3 py-1.5 rounded-xl text-xs font-bold ${activeDevSubTab==='lessons'?'btn-primary':'btn-soft'}">
+            <i class="fas fa-book-medical"></i> ${isAr ? 'الدروس وتغذية الروبوت' : 'Lessons & Bot Feed'}
+          </button>
+          <button onclick="switchDevTab('files')" class="px-3 py-1.5 rounded-xl text-xs font-bold ${activeDevSubTab==='files'?'btn-primary':'btn-soft'}">
+            <i class="fas fa-folder-open"></i> ${isAr ? 'ملفات المستخدمين' : 'User Files'} (${state.user.files.length})
+          </button>
+          <button onclick="switchDevTab('tabs')" class="px-3 py-1.5 rounded-xl text-xs font-bold ${activeDevSubTab==='tabs'?'btn-primary':'btn-soft'}">
+            <i class="fas fa-table-columns"></i> ${isAr ? 'إدارة التبويبات' : 'Manage Tabs'}
+          </button>
+          <button onclick="switchDevTab('texts')" class="px-3 py-1.5 rounded-xl text-xs font-bold ${activeDevSubTab==='texts'?'btn-primary':'btn-soft'}">
+            <i class="fas fa-pen-to-square"></i> ${isAr ? 'النصوص والصور' : 'Texts & Images'}
+          </button>
+        </div>
+      </div>
+
+      ${activeDevSubTab === 'lessons' ? `
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="surface rounded-2xl p-4 space-y-3">
+            <h3 class="font-bold text-sm text-blue-600"><i class="fas fa-plus-circle"></i> ${isAr ? 'إضافة درس جديد (يغذي الشات بوت تلقائياً)' : 'Add New Lesson (Auto-feeds Chatbot)'}</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-bold mb-1">${isAr ? 'البرنامج' : 'Program'}</label>
+                <select id="newLessonProg" class="w-full surface rounded-lg px-2.5 py-2 text-xs font-bold">
+                  <option value="word">Microsoft Word</option>
+                  <option value="powerpoint">Microsoft PowerPoint</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold mb-1">${isAr ? 'أيقونة الدرس' : 'Lesson Icon'}</label>
+                <select id="newLessonIcon" class="w-full surface rounded-lg px-2.5 py-2 text-xs">
+                  <option value="fa-star">نجمة (fa-star)</option>
+                  <option value="fa-file-word">وورد (fa-file-word)</option>
+                  <option value="fa-file-powerpoint">باوربوينت (fa-file-powerpoint)</option>
+                  <option value="fa-wand-magic-sparkles">سحر (fa-wand-magic-sparkles)</option>
+                  <option value="fa-table">جدول (fa-table)</option>
+                </select>
+              </div>
+            </div>
+            <input id="newLessonTitleAr" placeholder="${isAr ? 'عنوان الدرس بالعربية' : 'Arabic Title'}" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+            <input id="newLessonTitleEn" placeholder="${isAr ? 'عنوان الدرس بالإنجليزية' : 'English Title'}" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+            <textarea id="newLessonContentAr" rows="3" placeholder="${isAr ? 'محتوى الشرح بالعربية (سيستخدمه الشات بوت للإجابة)...' : 'Arabic Content (used by chatbot)...'}" class="w-full surface rounded-lg px-3 py-2 text-xs"></textarea>
+            <textarea id="newLessonContentEn" rows="2" placeholder="${isAr ? 'محتوى الشرح بالإنجليزية...' : 'English Content...'}" class="w-full surface rounded-lg px-3 py-2 text-xs"></textarea>
+            <input id="newLessonImage" placeholder="${isAr ? 'رابط صورة الدرس (اختياري)' : 'Lesson Image URL (optional)'}" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+            <button onclick="addDeveloperLesson()" class="btn-primary w-full py-2.5 rounded-xl font-bold text-xs">
+              <i class="fas fa-plus"></i> ${isAr ? 'إضافة الدرس وتغذية الشات بوت' : 'Add Lesson & Feed Bot'}
+            </button>
+          </div>
+
+          <div class="surface rounded-2xl p-4 space-y-2 max-h-[520px] overflow-y-auto">
+            <h3 class="font-bold text-sm"><i class="fas fa-list"></i> ${isAr ? 'قائمة الدروس الحالية' : 'Current Lessons'} (${allL.length})</h3>
+            ${allL.map(l => `
+              <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 text-xs" style="border-color:var(--border);background:var(--bg);">
+                <div class="flex items-center gap-2">
+                  <i class="fas ${l.icon || 'fa-book'} text-blue-600"></i>
+                  <div>
+                    <div class="font-bold">${esc(tL(l.title))}</div>
+                    <div class="text-[10px] text-muted">${l.program.toUpperCase()}</div>
+                  </div>
+                </div>
+                <button onclick="deleteLessonByDev('${l.id}')" class="px-2 py-1 rounded bg-red-100 text-red-700 font-bold hover:bg-red-200" title="حذف">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      ${activeDevSubTab === 'files' ? `
+        <div class="surface rounded-2xl p-4">
+          <h3 class="font-bold text-sm mb-3"><i class="fas fa-folder-open text-cyan-600"></i> ${isAr ? 'ملفات المستخدمين المرفوعة في مساحة التدريب' : 'User Uploaded Lab Files'}</h3>
+          ${state.user.files.length === 0 ? `<p class="text-sm text-muted py-4 text-center">${isAr ? 'لم يقم أي مستخدم برفع ملفات حتى الآن.' : 'No files uploaded by users yet.'}</p>` : `
+            <div class="space-y-2">
+              ${state.user.files.map((f, idx) => `
+                <div class="p-3 rounded-xl border flex items-center justify-between gap-2 text-xs" style="border-color:var(--border);background:var(--bg);">
+                  <div>
+                    <div class="font-bold text-sm"><i class="fas fa-file-alt text-blue-600 me-1"></i> ${esc(f.name)}</div>
+                    <div class="text-muted mt-0.5">${isAr ? 'الحجم:' : 'Size:'} ${Math.max(1, Math.round((f.size||0)/1024))} KB • ${new Date(f.time).toLocaleString()}</div>
+                  </div>
+                  <button onclick="deleteUserFileByDev(${idx})" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 font-bold">
+                    <i class="fas fa-trash"></i> ${isAr ? 'حذف' : 'Delete'}
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+      ` : ''}
+
+      ${activeDevSubTab === 'tabs' ? `
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="surface rounded-2xl p-4 space-y-3">
+            <h3 class="font-bold text-sm text-purple-600"><i class="fas fa-plus-square"></i> ${isAr ? 'إضافة تبويب مخصص للمطور' : 'Add Custom Developer Tab'}</h3>
+            <input id="newTabLabelAr" placeholder="${isAr ? 'اسم التبويب بالعربية' : 'Arabic Tab Label'}" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+            <input id="newTabLabelEn" placeholder="${isAr ? 'اسم التبويب بالإنجليزية' : 'English Tab Label'}" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+            <select id="newTabIcon" class="w-full surface rounded-lg px-3 py-2 text-xs">
+              <option value="fa-layer-group">طبقات (fa-layer-group)</option>
+              <option value="fa-chart-pie">إحصائيات (fa-chart-pie)</option>
+              <option value="fa-bullhorn">إعلانات (fa-bullhorn)</option>
+              <option value="fa-database">بيانات (fa-database)</option>
+            </select>
+            <textarea id="newTabContentAr" rows="3" placeholder="${isAr ? 'محتوى التبويب بالعربية...' : 'Tab content in Arabic...'}" class="w-full surface rounded-lg px-3 py-2 text-xs"></textarea>
+            <button onclick="addCustomDevTab()" class="btn-primary w-full py-2.5 rounded-xl font-bold text-xs">
+              <i class="fas fa-plus"></i> ${isAr ? 'إنشاء التبويب' : 'Create Tab'}
+            </button>
+          </div>
+
+          <div class="surface rounded-2xl p-4 space-y-2">
+            <h3 class="font-bold text-sm"><i class="fas fa-sliders"></i> ${isAr ? 'التبويبات المخصصة المضافة' : 'Added Custom Tabs'}</h3>
+            ${(state.devStudio.customTabs || []).length === 0 ? `<p class="text-xs text-muted">${isAr ? 'لا توجد تبويبات مخصصة بعد.' : 'No custom tabs yet.'}</p>` :
+              state.devStudio.customTabs.map((ct, idx) => `
+                <div class="p-2.5 rounded-xl border flex items-center justify-between text-xs" style="border-color:var(--border);background:var(--bg);">
+                  <span class="font-bold"><i class="fas ${ct.icon} me-1.5 text-purple-600"></i>${esc(ct.labelAr)} / ${esc(ct.labelEn)}</span>
+                  <button onclick="deleteCustomDevTab(${idx})" class="px-2 py-1 rounded bg-red-100 text-red-700 font-bold"><i class="fas fa-trash"></i></button>
+                </div>
+              `).join('')
+            }
+          </div>
+        </div>
+      ` : ''}
+
+      ${activeDevSubTab === 'texts' ? `
+        <div class="surface rounded-2xl p-4 space-y-3 max-w-2xl">
+          <h3 class="font-bold text-sm text-emerald-600"><i class="fas fa-pen-to-square"></i> ${isAr ? 'تعديل نصوص الواجهة الترحيبية' : 'Edit Welcome Screen Texts'}</h3>
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr ? 'العنوان الترحيبي (عربي)' : 'Welcome Title (AR)'}</label>
+            <input id="editWelcomeTitleAr" value="${esc(state.devStudio.welcomeTitleAr)}" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr ? 'العنوان الترحيبي (إنجليزي)' : 'Welcome Title (EN)'}</label>
+            <input id="editWelcomeTitleEn" value="${esc(state.devStudio.welcomeTitleEn)}" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr ? 'الوصف الترحيبي (عربي)' : 'Welcome Description (AR)'}</label>
+            <textarea id="editWelcomeDescAr" rows="2" class="w-full surface rounded-lg px-3 py-2 text-xs">${esc(state.devStudio.welcomeDescAr)}</textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr ? 'الوصف الترحيبي (إنجليزي)' : 'Welcome Description (EN)'}</label>
+            <textarea id="editWelcomeDescEn" rows="2" class="w-full surface rounded-lg px-3 py-2 text-xs">${esc(state.devStudio.welcomeDescEn)}</textarea>
+          </div>
+          <button onclick="saveDevWelcomeTexts()" class="btn-primary px-5 py-2.5 rounded-xl font-bold text-xs">
+            <i class="fas fa-save"></i> ${isAr ? 'حفظ التعديلات' : 'Save Changes'}
+          </button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function addDeveloperLesson(){
+  const prog = $('#newLessonProg').value;
+  const icon = $('#newLessonIcon').value;
+  const titleAr = ($('#newLessonTitleAr').value || '').trim();
+  const titleEn = ($('#newLessonTitleEn').value || '').trim() || titleAr;
+  const contentAr = ($('#newLessonContentAr').value || '').trim();
+  const contentEn = ($('#newLessonContentEn').value || '').trim() || contentAr;
+  const image = ($('#newLessonImage').value || '').trim();
+
+  if(!titleAr || !contentAr){
+    toast(state.lang==='ar' ? 'يرجى إدخال عنوان ومحتوى الدرس' : 'Please enter lesson title and content');
+    return;
+  }
+
+  state.devStudio.customLessons.push({
+    id: 'custom_l_' + Date.now(),
+    program: prog,
+    icon,
+    titleAr, titleEn,
+    contentAr, contentEn,
+    image
+  });
+  saveState();
+  toast(state.lang==='ar' ? 'تمت إضافة الدرس وتغذية الشات بوت بنجاح ✓' : 'Lesson added & chatbot fed ✓');
+  render();
+}
+
+function deleteLessonByDev(id){
+  state.devStudio.customLessons = (state.devStudio.customLessons || []).filter(l => l.id !== id);
+  if(!state.devStudio.deletedLessonIds.includes(id)){
+    state.devStudio.deletedLessonIds.push(id);
+  }
+  saveState();
+  toast(state.lang==='ar' ? 'تم حذف الدرس' : 'Lesson deleted');
+  render();
+}
+
+function deleteUserFileByDev(idx){
+  state.user.files.splice(idx, 1);
+  saveState();
+  toast(state.lang==='ar' ? 'تم حذف الملف' : 'File deleted');
+  render();
+}
+
+function addCustomDevTab(){
+  const labelAr = ($('#newTabLabelAr').value || '').trim();
+  const labelEn = ($('#newTabLabelEn').value || '').trim() || labelAr;
+  const icon = $('#newTabIcon').value;
+  const contentAr = ($('#newTabContentAr').value || '').trim();
+  if(!labelAr){
+    toast(state.lang==='ar' ? 'أدخل اسم التبويب' : 'Enter tab label');
+    return;
+  }
+  state.devStudio.customTabs.push({
+    id: 'dev_tab_' + Date.now(),
+    labelAr, labelEn, icon,
+    color: '#7c3aed',
+    contentAr, contentEn: contentAr
+  });
+  saveState();
+  renderNav();
+  toast(state.lang==='ar' ? 'تم إنشاء التبويب بنجاح ✓' : 'Custom tab created ✓');
+  render();
+}
+
+function deleteCustomDevTab(idx){
+  state.devStudio.customTabs.splice(idx, 1);
+  saveState();
+  renderNav();
+  render();
+}
+
+function saveDevWelcomeTexts(){
+  state.devStudio.welcomeTitleAr = $('#editWelcomeTitleAr').value;
+  state.devStudio.welcomeTitleEn = $('#editWelcomeTitleEn').value;
+  state.devStudio.welcomeDescAr = $('#editWelcomeDescAr').value;
+  state.devStudio.welcomeDescEn = $('#editWelcomeDescEn').value;
+  saveState();
+  toast(state.lang==='ar' ? 'تم حفظ النصوص بنجاح ✓' : 'Texts saved ✓');
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   13. USER VIEWS (DASHBOARD, LEARNING, LESSON, CHATBOT, LAB, QUIZZES, SKILLS, LIBRARY, PROFILE)
+═════════════════════════════════════════════════════════════════════════ */
+function viewDashboard(){
+  const pct = progressPct();
+  const doneCount = state.user.completedLessons.length;
+  const last = [...state.user.completedLessons].reverse()[0];
+  const lastInfo = last ? findLesson(last) : null;
+  const nextLesson = allLessons().find(l => !state.user.completedLessons.includes(l.id));
+
+  return `
+    <div class="space-y-4">
+      <div class="surface rounded-2xl p-5">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="text-5xl">${state.settings.avatar}</div>
+            <div>
+              <h1 class="text-xl font-bold">${t('welcome')}، ${esc(state.user.name)} 👋</h1>
+              <p class="text-muted text-sm">${esc(state.settings.botName)} — <span class="text-blue-600 font-semibold">${state.lang==='ar'?'المساعد الذكي لتعلم Word و PowerPoint':'Smart Assistant for Word & PowerPoint'}</span></p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="navigate('chatbot')" class="btn-soft px-4 py-2 rounded-xl font-bold text-sm">
+              <i class="fas fa-comments"></i> ${t('chatbot')}
+            </button>
+            <button onclick="navigate('learning')" class="btn-primary px-5 py-2 rounded-xl font-bold text-sm">
+              <i class="fas fa-play"></i> ${t('continueLearning')}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        ${statCard('fa-chart-line', pct+'%', t('progress'), 'var(--primary)')}
+        ${statCard('fa-book', doneCount, t('lessonsDone'), '#16a34a')}
+        ${statCard('fa-award', state.user.badges.length, t('badges'), '#f59e0b')}
+        ${statCard('fa-star', state.user.points, t('points'), '#dc2626')}
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-3">
+        <div class="surface rounded-2xl p-4">
+          <h3 class="font-bold mb-2 text-sm"><i class="fas fa-clock text-muted"></i> ${t('lastLesson')}</h3>
+          ${lastInfo ? `<button onclick="openLesson('${lastInfo.id}')" class="w-full text-start p-3 rounded-xl" style="background:var(--primary-soft);">
+            <div class="font-bold text-sm"><i class="fas ${lastInfo.icon||'fa-book'} me-1"></i> ${tL(lastInfo.title)}</div>
+            <div class="text-xs text-muted mt-1">${tL(lastInfo.unit.title)}</div>
+          </button>` : `<p class="text-muted text-sm">${t('noData')}</p>`}
+        </div>
+        <div class="surface rounded-2xl p-4">
+          <h3 class="font-bold mb-2 text-sm"><i class="fas fa-forward text-muted"></i> ${t('nextLesson')}</h3>
+          ${nextLesson ? `<button onclick="openLesson('${nextLesson.id}')" class="w-full text-start p-3 rounded-xl" style="background:var(--primary-soft);">
+            <div class="font-bold text-sm"><i class="fas ${nextLesson.icon||'fa-book'} me-1"></i> ${tL(nextLesson.title)}</div>
+            <div class="text-xs text-muted mt-1">${tL(nextLesson.unit.title)}</div>
+          </button>` : `<p class="text-muted text-sm">🎉 ${t('done')}</p>`}
+        </div>
+      </div>
+
+      <div class="surface rounded-2xl p-4">
+        <h3 class="font-bold mb-3 text-sm"><i class="fas fa-bolt text-muted"></i> ${t('quickAccess')}</h3>
+        <div class="grid grid-cols-2 gap-3">
+          ${Object.keys(CUR).map(k => {
+            const units = getEffectiveProgramUnits(k);
+            const totalL = units.reduce((a,u)=>a+u.lessons.length,0);
+            return `
+              <button onclick="openProgram('${k}')" class="p-3.5 rounded-xl text-start card-hover" style="background:var(--primary-soft);">
+                <div class="flex items-center gap-3">
+                  <i class="fas ${CUR[k].icon} text-3xl" style="color:${CUR[k].color};"></i>
+                  <div>
+                    <div class="font-bold text-sm">${tL(CUR[k].title)}</div>
+                    <div class="text-xs text-muted">${totalL} ${t('lesson')}</div>
+                  </div>
+                </div>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function viewLearning(){
+  return `
+    <div class="space-y-4">
+      <h1 class="text-2xl font-bold"><i class="fas fa-graduation-cap text-green-600"></i> ${t('learning')}</h1>
+      <div class="grid md:grid-cols-2 gap-4">
+        ${Object.keys(CUR).map(k => {
+          const units = getEffectiveProgramUnits(k);
+          const lessons = programLessons(k);
+          const done = lessons.filter(l => state.user.completedLessons.includes(l.id)).length;
+          const pct = lessons.length ? Math.round(done/lessons.length*100) : 0;
+          return `
+            <div class="surface rounded-2xl p-5 card-hover">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style="background:${CUR[k].color}18;color:${CUR[k].color};">
+                  <i class="fas ${CUR[k].icon}"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold">${tL(CUR[k].title)}</h3>
+                  <p class="text-sm text-muted">${units.length} ${t('units')}</p>
+                </div>
+              </div>
+              <div class="w-full h-2 rounded-full mb-2" style="background:var(--border);">
+                <div class="h-2 rounded-full" style="width:${pct}%;background:${CUR[k].color};"></div>
+              </div>
+              <div class="text-xs text-muted mb-3">${done}/${lessons.length} (${pct}%)</div>
+              <button onclick="openProgram('${k}')" class="btn-primary px-4 py-2 rounded-lg text-sm font-bold w-full">${t('startLearning')}</button>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function openProgram(key){
+  const p = CUR[key];
+  const units = getEffectiveProgramUnits(key);
+  state.ctx.program = key;
+  saveState();
+  const c = $('#pageContent');
+  c.innerHTML = `
+    <div class="space-y-4">
+      <button onclick="navigate('learning')" class="text-sm text-muted hover:underline"><i class="fas fa-arrow-${state.lang==='ar'?'right':'left'}"></i> ${t('learning')}</button>
+      <div class="surface rounded-2xl p-5">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2.5">
+          <span class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:${p.color}18;color:${p.color};">
+            <i class="fas ${p.icon}"></i>
+          </span>
+          <span>${tL(p.title)}</span>
+        </h2>
+        ${units.map(u => `
+          <div class="rounded-xl border mb-3" style="border-color:var(--border);">
+            <div class="p-3 font-bold text-sm flex items-center gap-2" style="background:var(--primary-soft); border-radius:12px 12px 0 0;">
+              <i class="fas ${u.icon || 'fa-folder'}" style="color:${u.color || p.color};"></i>
+              <span>${tL(u.title)}</span>
+            </div>
+            <div class="p-2 space-y-1">
+              ${u.lessons.map(l => `
+                <button onclick="openLesson('${l.id}')" class="w-full text-start p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs" style="background:${p.color}15;color:${p.color};">
+                    <i class="fas ${l.icon || 'fa-file-lines'}"></i>
+                  </span>
+                  <span class="text-sm flex-1 font-semibold">${tL(l.title)}</span>
+                  <i class="fas ${state.user.completedLessons.includes(l.id)?'fa-check-circle text-green-500':'fa-circle text-gray-300'} text-sm"></i>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function openLesson(id){
+  state.ctx.lessonId = id;
+  const info = findLesson(id);
+  if(info) state.ctx.program = info.program;
+  saveState();
+  state.page = 'lesson';
+  renderNav();
+  render();
+}
+
+function viewLesson(){
+  const info = findLesson(state.ctx.lessonId);
+  if(!info) return `<p class="text-muted">${t('noData')}</p>`;
+  const {unit, program} = info;
+  const lesson = info;
+  const done = state.user.completedLessons.includes(lesson.id);
+  const lessons = programLessons(program);
+  const idx = lessons.findIndex(l => l.id === lesson.id);
+  const prev = idx > 0 ? lessons[idx-1] : null;
+  const next = idx < lessons.length-1 ? lessons[idx+1] : null;
+
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <div class="flex items-center justify-between gap-2">
+        <button onclick="openProgram('${program}')" class="text-sm text-muted hover:underline"><i class="fas fa-arrow-${state.lang==='ar'?'right':'left'}"></i> ${t('learning')}</button>
+        <button onclick="speakCurrentLesson(this)" class="btn-soft px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm">
+          <i class="fas fa-volume-high"></i> ${t('listenLesson')}
+        </button>
+      </div>
+
+      <div class="surface rounded-2xl p-5">
+        <div class="text-xs text-muted mb-1 flex items-center gap-1.5">
+          <i class="fas ${unit.icon||'fa-folder'}"></i>
+          <span>${tL(unit.title)}</span>
+        </div>
+        <h1 class="text-2xl font-bold mb-3 flex items-center gap-2">
+          <i class="fas ${lesson.icon||'fa-book-open'} text-blue-600"></i>
+          <span>${tL(lesson.title)}</span>
+        </h1>
+
+        <div class="p-3 rounded-xl mb-4" style="background:var(--primary-soft);">
+          <div class="font-bold text-xs mb-1"><i class="fas fa-bullseye"></i> ${t('objective')}</div>
+          <div class="text-sm">${tL(lesson.objective)}</div>
+        </div>
+
+        <div class="mb-4 leading-relaxed text-sm sm:text-base">${tL(lesson.content).replace(/\n/g,'<br>')}</div>
+
+        ${lesson.image ? `<img src="${lesson.image}" alt="" class="rounded-xl w-full mb-4 max-h-64 object-cover" onerror="this.style.display='none'" loading="lazy"/>` : ''}
+
+        <h3 class="font-bold mt-4 mb-2"><i class="fas fa-list-ol"></i> ${t('steps')}</h3>
+        <ol class="list-decimal ps-6 space-y-1.5 text-sm">${tL(lesson.steps).map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+
+        <div class="grid md:grid-cols-2 gap-3 mt-4">
+          <div class="p-3 rounded-xl" style="background:#dbeafe;color:#1e3a8a;">
+            <div class="font-bold text-xs mb-1"><i class="fas fa-lightbulb"></i> ${t('tips')}</div>
+            <div class="text-sm">${tL(lesson.tips)}</div>
+          </div>
+          <div class="p-3 rounded-xl" style="background:#fee2e2;color:#991b1b;">
+            <div class="font-bold text-xs mb-1"><i class="fas fa-triangle-exclamation"></i> ${t('mistakes')}</div>
+            <div class="text-sm">${tL(lesson.mistakes)}</div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl mt-3" style="background:var(--surface); border:1px solid var(--border);">
+          <div class="font-bold text-xs mb-1"><i class="fas fa-bookmark"></i> ${t('summary')}</div>
+          <div class="text-sm">${tL(lesson.summary)}</div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mt-5">
+          <button onclick="askBotAboutLesson()" class="btn-soft px-4 py-2 rounded-lg font-bold text-sm"><i class="fas fa-comments"></i> ${t('askBot')}</button>
+          ${lesson.quiz && lesson.quiz.length ? `<button onclick="startQuiz('${lesson.id}')" class="btn-soft px-4 py-2 rounded-lg font-bold text-sm"><i class="fas fa-clipboard-check"></i> ${t('quiz')}</button>` : ''}
+          <button onclick="markDone('${lesson.id}')" class="px-4 py-2 rounded-lg font-bold text-sm ${done?'bg-green-600 text-white':'btn-primary'}">
+            <i class="fas fa-check"></i> ${done ? t('done') : t('markDone')}
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-between gap-2">
+        ${prev ? `<button onclick="openLesson('${prev.id}')" class="surface px-3 py-2 rounded-lg text-sm"><i class="fas fa-arrow-${state.lang==='ar'?'right':'left'}"></i> ${t('prev')}</button>` : '<div></div>'}
+        ${next ? `<button onclick="openLesson('${next.id}')" class="btn-primary px-3 py-2 rounded-lg text-sm font-bold">${t('next')} <i class="fas fa-arrow-${state.lang==='ar'?'left':'right'}"></i></button>` : '<div></div>'}
+      </div>
+    </div>
+  `;
+}
+
+function markDone(id){
+  if(!state.user.completedLessons.includes(id)){
+    state.user.completedLessons.push(id);
+    state.user.points += 10;
+    if(Math.floor(state.user.points/100)+1 > state.user.level){
+      state.user.level = Math.floor(state.user.points/100)+1;
+      state.user.badges.push('level_'+state.user.level);
+    }
+    saveState();
+    toast('✓ +10 '+t('points'));
+    render();
+  }
+}
+
+function askBotAboutLesson(){
+  const info = findLesson(state.ctx.lessonId);
+  navigate('chatbot');
+  setTimeout(() => {
+    const input = $('#chatInput');
+    if(input && info){
+      input.value = state.lang==='ar' ? `اشرح لي المزيد عن ${tL(info.title)}` : `Tell me more about ${tL(info.title)}`;
+      input.focus();
+    }
+  }, 100);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   14. CHATBOT & KNOWLEDGE SEARCH (INCLUDING DEVELOPER ADDED LESSONS)
+═════════════════════════════════════════════════════════════════════════ */
+function getEffectiveKB(){
+  const customEntries = (state.devStudio.customLessons || []).map(cl => ({
+    id: cl.id,
+    lessonId: cl.id,
+    title: state.lang === 'ar' ? cl.titleAr : (cl.titleEn || cl.titleAr),
+    keywords: (cl.titleAr + ' ' + (cl.titleEn||'') + ' ' + cl.program).toLowerCase().split(/\s+/),
+    content: state.lang === 'ar' ? cl.contentAr : (cl.contentEn || cl.contentAr),
+    source: 'دروس المطور المضافة'
+  }));
+  return [...KB, ...customEntries];
+}
+
+function viewChatbot(){
+  const convs = state.user.conversations;
+  const cur = getConv();
+  return `
+    <div class="max-w-4xl mx-auto h-full">
+      <div class="surface rounded-2xl overflow-hidden flex flex-col h-full">
+        <div class="p-3 border-b flex items-center justify-between" style="border-color:var(--border);">
+          <div class="flex items-center gap-2.5">
+            <div class="text-3xl">${state.settings.avatar}</div>
+            <div>
+              <div class="font-bold text-sm">${esc(state.settings.botName)}</div>
+              <div class="text-xs text-muted flex items-center gap-1.5">
+                <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+                <span>${state.lang==='ar'?'متصل وجاهز للإجابة':'Online & Ready'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="newChat()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="${t('newChat')}"><i class="fas fa-plus"></i></button>
+            <button onclick="toggleHistory()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="${t('history')}"><i class="fas fa-history"></i></button>
+          </div>
+        </div>
+        <div id="historyPanel" class="hidden p-3 border-b overflow-y-auto" style="border-color:var(--border);max-height:160px;">
+          <div class="text-xs font-bold mb-2">${t('history')}</div>
+          ${convs.length === 0 ? `<p class="text-xs text-muted">${t('noData')}</p>` :
+            convs.slice(0,10).map(c => `<button onclick="loadConv('${c.id}')" class="w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1">
+              ${esc(c.title || t('newChat'))} <span class="text-xs text-muted">(${c.messages.length})</span>
+            </button>`).join('')}
+        </div>
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3">
+          ${renderMessages(cur)}
+        </div>
+        <div class="p-3 border-t" style="border-color:var(--border);">
+          <div class="flex flex-wrap gap-1.5 mb-2">
+            ${getSuggestions().slice(0,3).map(q => `<button onclick="quickAsk('${q.replace(/'/g,"\\'")}')" class="chip">${esc(q)}</button>`).join('')}
+          </div>
+          <div class="flex gap-2">
+            <button id="micBtn" onclick="toggleVoice()" class="p-2.5 rounded-xl btn-soft" title="${t('voiceInput')}"><i class="fas fa-microphone"></i></button>
+            <input id="chatInput" type="text" placeholder="${t('sendMessage')}" class="flex-1 surface rounded-xl px-3.5 py-2 text-sm" onkeypress="if(event.key==='Enter') sendChat()" />
+            <button onclick="sendChat()" class="btn-primary px-4 py-2 rounded-xl font-bold"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function getConv(){
+  if(!state.ctx.conversationId){
+    const conv = {id:'c_'+Date.now(), title:'', messages:[], created:Date.now()};
+    state.user.conversations.unshift(conv);
+    state.ctx.conversationId = conv.id;
+    saveState();
+    return conv;
+  }
+  return state.user.conversations.find(c => c.id === state.ctx.conversationId);
+}
+
+function renderMessages(conv){
+  if(!conv || !conv.messages.length){
+    return `<div class="text-center text-muted py-6">
+      <div class="text-6xl mb-3">${state.settings.avatar}</div>
+      <p class="font-bold mb-1 text-base">${t('welcome')} 👋</p>
+      <p class="text-sm">${t('askAnything')}</p>
+    </div>`;
+  }
+  return conv.messages.map((m, idx) => m.role === 'user'
+    ? `<div class="flex justify-end"><div class="chat-user">${esc(m.content)}</div></div>`
+    : `<div class="flex justify-start gap-2">
+        <div class="text-2xl mt-1">${state.settings.avatar}</div>
+        <div class="chat-ai">
+          <div style="white-space:pre-wrap;line-height:1.7;">${esc(m.content)}</div>
+          <div class="flex flex-wrap items-center gap-2 mt-2.5 pt-2 border-t text-xs" style="border-color:var(--border);">
+            <button onclick="speakMsgIndex(${idx}, this)" class="btn-soft px-2.5 py-1 rounded-lg font-bold flex items-center gap-1.5">
+              <i class="fas fa-volume-high"></i> ${t('listen')}
+            </button>
+            <button onclick="copyMsgIndex(${idx})" class="px-2.5 py-1 rounded-lg text-muted hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1">
+              <i class="fas fa-copy"></i> ${state.lang==='ar'?'نسخ':'Copy'}
+            </button>
+          </div>
+        </div>
+      </div>`
+  ).join('');
+}
+
+function speakMsgIndex(idx, btnEl) {
+  const conv = getConv();
+  if (conv && conv.messages[idx]) speakText(conv.messages[idx].content, btnEl);
+}
+function copyMsgIndex(idx) {
+  const conv = getConv();
+  if (conv && conv.messages[idx]) copyText(conv.messages[idx].content);
+}
+function newChat(){ state.ctx.conversationId = null; saveState(); render(); }
+function loadConv(id){ state.ctx.conversationId = id; saveState(); render(); }
+function toggleHistory(){ $('#historyPanel').classList.toggle('hidden'); }
+function quickAsk(q){ const input = $('#chatInput'); if(input){ input.value = q; sendChat(); } }
+
+function getSuggestions(){
+  const base = {
+    ar:['ما هو Microsoft Word؟','كيف أضيف أمراً إلى QAT؟','ما الفرق بين Animation وTransition؟','كيف أحفظ المستند بصيغة PDF؟'],
+    en:['What is Microsoft Word?','How to add command to QAT?','Animation vs Transition?','How to save as PDF?']
+  };
+  return base[state.lang] || base.ar;
+}
+
+function normalizeAr(text){
+  return String(text || '').toLowerCase()
+    .replace(/[\u064B-\u0652\u0670\u0640]/g,'')
+    .replace(/[إأآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
+    .replace(/[^\w\s\u0600-\u06FF]/g,' ').replace(/\s+/g,' ').trim();
+}
+function tokenize(text){
+  return normalizeAr(text).split(' ').filter(w => w.length > 1);
+}
+
+function localSearch(query){
+  const qTokens = tokenize(query);
+  if(!qTokens.length) return [];
+  const effKB = getEffectiveKB();
+  const scored = effKB.map(doc => {
+    const docTokens = tokenize(doc.title+' '+doc.content+' '+(doc.keywords||[]).join(' '));
+    let score = 0;
+    for(const tok of qTokens){
+      if(docTokens.includes(tok)) score += 2;
+    }
+    return {...doc, score};
+  });
+  return scored.filter(d => d.score > 0).sort((a,b) => b.score - a.score).slice(0, 2);
+}
+
+async function sendChat(){
+  const input = $('#chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  const conv = getConv();
+  conv.messages.push({role:'user', content:text, time:Date.now()});
+  if(!conv.title) conv.title = text.slice(0,40);
+  saveState();
+  const box = $('#chatMessages');
+  box.innerHTML = renderMessages(conv);
+  box.scrollTop = box.scrollHeight;
+
+  const results = localSearch(text);
+  const ar = state.lang === 'ar';
+  let reply = '';
+  if(results.length){
+    reply = `📚 ${results[0].title}\n\n${results[0].content}`;
+  } else {
+    reply = ar
+      ? 'سؤال رائع! يمكنك مراجعة دروس Word و PowerPoint في مركز التعلم للحصول على شرح تفصيلي وخطوات عملية.'
+      : 'Great question! You can explore Word and PowerPoint lessons in the Learning Center for detailed steps.';
+  }
+  conv.messages.push({role:'assistant', content:reply, time:Date.now()});
+  saveState();
+  box.innerHTML = renderMessages(conv);
+  box.scrollTop = box.scrollHeight;
+}
+
+function copyText(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  toast(t('copied'));
+}
+
+let recognition = null, isRec = false;
+function toggleVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast(state.lang==='ar'?'المتصفح لا يدعم الإدخال الصوتي':'Voice input not supported'); return; }
+  if(isRec){ recognition.stop(); return; }
+  recognition = new SR();
+  recognition.lang = state.lang === 'ar' ? 'ar-SA' : 'en-US';
+  recognition.onstart = () => { isRec = true; $('#micBtn')?.classList.add('pulse-rec'); };
+  recognition.onend = () => { isRec = false; $('#micBtn')?.classList.remove('pulse-rec'); };
+  recognition.onresult = (e) => { const input = $('#chatInput'); if(input) input.value = e.results[0][0].transcript; };
+  recognition.start();
+}
+function initChat(){ if('speechSynthesis' in window) window.speechSynthesis.getVoices(); }
+
+/* ═════════════════════════════════════════════════════════════════════════
+   15. LAB, QUIZZES, SKILLS, LIBRARY, USER PROFILE
+═════════════════════════════════════════════════════════════════════════ */
+const LAB = [
+  {id:'lab1', program:'word', title:L('مستند أساسي','Basic Document'),
+   desc:L('أنشئ مستنداً يحتوي عنواناً وفقرتين وجدولاً 3×3 وصورة.','Create a doc with title, 2 paragraphs, 3×3 table, image.'),
+   criteria:L(['عنوان بخط كبير','فقرتان','جدول 3×3','صورة مع Wrap Text'],['Large title','2 paragraphs','3×3 table','Image with Wrap Text'])},
+  {id:'lab3', program:'powerpoint', title:L('عرض 5 شرائح','5-Slide Deck'),
+   desc:L('عرض من 5 شرائح: عنوان، محتوى، صورة، مخطط، خاتمة.','5 slides: title, content, image, chart, conclusion.'),
+   criteria:L(['5 شرائح','قالب موحد','صورة','مخطط'],['5 slides','Consistent template','Image','Chart'])}
+];
+
+function viewLab(){
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold"><i class="fas fa-flask text-cyan-600"></i> ${t('lab')}</h1>
+      <p class="text-sm text-muted">${state.lang==='ar'?'نفّذ المهام عملياً ثم ارفع ملفك ليطلع عليه المطور.':'Complete tasks then upload your file for developer review.'}</p>
+      ${LAB.map(task => `
+        <div class="surface rounded-2xl p-4">
+          <div class="text-xs px-2 py-0.5 rounded-full inline-block mb-1" style="background:var(--primary-soft);color:var(--primary);">${t(task.program)}</div>
+          <h3 class="font-bold mb-1">${tL(task.title)}</h3>
+          <p class="text-sm text-muted mb-2">${tL(task.desc)}</p>
+          <ul class="list-disc ps-5 text-xs mb-3">${tL(task.criteria).map(c => `<li>${c}</li>`).join('')}</ul>
+          <input type="file" id="file_${task.id}" accept=".docx,.doc,.pptx,.ppt,.pdf" class="text-sm" onchange="uploadLab('${task.id}', this)" />
+          <div id="res_${task.id}" class="mt-2"></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function uploadLab(taskId, input){
+  const file = input.files[0];
+  if(!file) return;
+  const res = document.getElementById('res_'+taskId);
+  const sizeKB = Math.max(1, Math.round(file.size/1024));
+  state.user.files.push({name:file.name, size:file.size, task:taskId, time:Date.now()});
+  saveState();
+  res.innerHTML = `<div class="p-3 rounded-xl text-sm" style="background:var(--primary-soft);">✅ ${state.lang==='ar'?'تم رفع الملف بنجاح':'File uploaded'}: ${esc(file.name)} (${sizeKB} KB)</div>`;
+  toast(state.lang==='ar'?'تم الرفع':'Uploaded');
+}
+
+function viewQuizzes(){
+  const withQuiz = allLessons().filter(l => l.quiz && l.quiz.length);
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold"><i class="fas fa-clipboard-check text-amber-600"></i> ${t('quizzes')}</h1>
+      <div class="grid md:grid-cols-2 gap-3">
+        ${withQuiz.map(l => {
+          const r = state.user.quizResults[l.id];
+          return `<div class="surface rounded-2xl p-4">
+            <div class="text-xs text-muted mb-1">${t(l.program)}</div>
+            <h3 class="font-bold text-sm mb-2">${tL(l.title)}</h3>
+            ${r ? `<div class="text-sm mb-2">${t('score')}: <b>${r.score}/${r.total}</b></div>` : ''}
+            <button onclick="startQuiz('${l.id}')" class="btn-primary px-4 py-2 rounded-lg font-bold text-sm w-full">${t('quiz')}</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function startQuiz(lessonId){
+  const info = findLesson(lessonId);
+  if(!info || !info.quiz || !info.quiz.length) return;
+  const qs = info.quiz;
+  let answers = new Array(qs.length).fill(null);
+  let cur = 0;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-backdrop';
+  overlay.id = 'quizOverlay';
+
+  function draw(){
+    const q = qs[cur];
+    overlay.innerHTML = `
+      <div class="surface rounded-2xl p-5 w-full max-w-lg shadow-2xl">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-sm">${tL(info.title)} — ${t('quizTitle')}</h3>
+          <button onclick="document.getElementById('quizOverlay').remove()" class="p-1"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="font-bold mb-3 text-sm">${tL(q.q)}</div>
+        <div class="space-y-2 mb-4">
+          ${q.options.map((opt,i) => `
+            <button onclick="selectQ(${i})" class="w-full text-start p-3 rounded-lg border text-sm"
+              style="border-color:${answers[cur]===i?'var(--primary)':'var(--border)'};background:${answers[cur]===i?'var(--primary-soft)':'transparent'};">
+              ${tL(opt)}
+            </button>
+          `).join('')}
+        </div>
+        <div class="flex justify-between gap-2">
+          <button onclick="prevQ()" class="surface px-4 py-2 rounded-lg text-sm" ${cur===0?'disabled':''}>${t('prev')}</button>
+          ${cur < qs.length-1
+            ? `<button onclick="nextQ()" class="btn-primary px-4 py-2 rounded-lg font-bold text-sm" ${answers[cur]===null?'disabled':''}>${t('next')}</button>`
+            : `<button onclick="submitQ()" class="btn-primary px-4 py-2 rounded-lg font-bold text-sm" ${answers[cur]===null?'disabled':''}>${t('submit')}</button>`}
+        </div>
+      </div>
+    `;
+  }
+  window.selectQ = i => { answers[cur] = i; draw(); };
+  window.prevQ = () => { if(cur>0){ cur--; draw(); } };
+  window.nextQ = () => { if(answers[cur]!==null && cur<qs.length-1){ cur++; draw(); } };
+  window.submitQ = () => {
+    let score = 0;
+    qs.forEach((q,i) => { if(answers[i] === q.answer) score++; });
+    state.user.quizResults[lessonId] = {score, total:qs.length, time:Date.now()};
+    state.user.points += score * 5;
+    saveState();
+    overlay.innerHTML = `
+      <div class="surface rounded-2xl p-6 w-full max-w-lg text-center shadow-2xl">
+        <div class="text-5xl mb-3">${score===qs.length?'🏆':'👏'}</div>
+        <h3 class="text-xl font-bold mb-2">${t('score')}: ${score}/${qs.length}</h3>
+        <button onclick="document.getElementById('quizOverlay').remove();render()" class="btn-primary px-6 py-2 rounded-lg font-bold text-sm">${t('save')}</button>
+      </div>
+    `;
+  };
+  document.body.appendChild(overlay);
+  draw();
+}
+
+function viewSkills(){
+  const word = ['تنسيق المستندات','إعداد الأبحاث','الفهارس التلقائية','تنسيق الجداول'];
+  const ppt = ['الشرائح الاحترافية','العروض الأكاديمية','المخططات البيانية','الحركات والانتقالات'];
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold"><i class="fas fa-lightbulb text-amber-500"></i> ${t('skills')}</h1>
+      <div class="grid md:grid-cols-2 gap-3">
+        <div class="surface rounded-2xl p-4">
+          <h2 class="font-bold mb-2 flex items-center gap-2"><i class="fas fa-file-word" style="color:#2b579a;"></i> Word</h2>
+          ${word.map(s => `<button onclick="quickAskFromSkill('${s}')" class="w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex justify-between items-center mb-1">
+            <span>${s}</span><i class="fas fa-arrow-${state.lang==='ar'?'left':'right'} text-xs text-muted"></i>
+          </button>`).join('')}
+        </div>
+        <div class="surface rounded-2xl p-4">
+          <h2 class="font-bold mb-2 flex items-center gap-2"><i class="fas fa-file-powerpoint" style="color:#b7472a;"></i> PowerPoint</h2>
+          ${ppt.map(s => `<button onclick="quickAskFromSkill('${s}')" class="w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex justify-between items-center mb-1">
+            <span>${s}</span><i class="fas fa-arrow-${state.lang==='ar'?'left':'right'} text-xs text-muted"></i>
+          </button>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+function quickAskFromSkill(skill){
+  navigate('chatbot');
+  setTimeout(() => {
+    const input = $('#chatInput');
+    if(input){
+      input.value = state.lang === 'ar' ? `كيف أتعلم ${skill}؟` : `How do I learn ${skill}?`;
+      input.focus();
+    }
+  }, 100);
+}
+
+function viewLibrary(){
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold"><i class="fas fa-folder-open text-blue-600"></i> ${t('library')}</h1>
+      <div class="grid md:grid-cols-2 gap-3">
+        <div class="surface rounded-2xl p-4">
+          <h3 class="font-bold mb-2 text-sm">📚 ${t('lessonsDone')}</h3>
+          ${state.user.completedLessons.length === 0 ? `<p class="text-sm text-muted">${t('noData')}</p>` :
+            state.user.completedLessons.map(id => {
+              const info = findLesson(id);
+              return info ? `<button onclick="openLesson('${id}')" class="w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1">✓ ${tL(info.title)}</button>` : '';
+            }).join('')}
+        </div>
+        <div class="surface rounded-2xl p-4">
+          <h3 class="font-bold mb-2 text-sm">📄 ${state.lang==='ar'?'ملفاتي المرفوعة':'My Files'}</h3>
+          ${state.user.files.length === 0 ? `<p class="text-sm text-muted">${t('noData')}</p>` :
+            state.user.files.map(f => `<div class="text-sm p-2 border-b" style="border-color:var(--border);">📎 ${esc(f.name)}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function viewProfile(){
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <div class="surface rounded-2xl p-5 text-center">
+        <div class="text-6xl mb-2">${state.settings.avatar}</div>
+        <input id="profileName" value="${esc(state.user.name)}" onchange="state.user.name=this.value;saveState();render()"
+          class="text-xl font-bold text-center surface rounded-lg px-3 py-1 w-full max-w-xs mx-auto" />
+        <div class="text-xs text-muted mt-1">${esc(state.user.id)}</div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        ${statCard('fa-chart-line', progressPct()+'%', t('progress'), 'var(--primary)')}
+        ${statCard('fa-book', state.user.completedLessons.length, t('lessonsDone'), '#16a34a')}
+        ${statCard('fa-star', state.user.points, t('points'), '#f59e0b')}
+        ${statCard('fa-layer-group', state.user.level, state.lang==='ar'?'المستوى':'Level', '#dc2626')}
+      </div>
+    </div>
+  `;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   16. SETTINGS, EMBED & INIT
+═════════════════════════════════════════════════════════════════════════ */
+function exportData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'smart-office-tutor-data.json';
+  a.click();
+}
+function openResetConfirm(){ $('#resetConfirmModal').classList.remove('hidden'); }
+function executeResetAll(){ localStorage.removeItem(STORAGE_KEY); location.reload(); }
+
+function openSettings(){
+  const m = $('#settingsModal');
+  m.classList.remove('hidden');
+
+  const tg = $('#themeGrid');
+  tg.innerHTML = THEMES.map(th => `
+    <button onclick="applyTheme('${th}');openSettings()" class="p-2 rounded-lg border text-xs ${state.theme===th?'ring-2 ring-blue-500':''}" style="border-color:var(--border);">
+      <div class="w-full h-5 rounded mb-1" style="background:${th==='dark'?'#0f172a':th==='blue'?'#1d4ed8':th==='green'?'#15803d':th==='purple'?'#7c3aed':'#f8fafc'};${th==='light'?'border:1px solid #cbd5e1;':''}"></div>
+      ${t(th)}
+    </button>
+  `).join('');
+
+  const ag = $('#avatarGrid');
+  ag.innerHTML = ['🤖','👨‍🏫','👩‍🏫','🦉','🐱','🚀'].map(a =>
+    `<button onclick="state.settings.avatar='${a}';saveState();openSettings();" class="avatar-opt text-2xl p-2 rounded-lg border ${state.settings.avatar===a?'selected':''}" style="border-color:var(--border);">${a}</button>`
+  ).join('');
+
+  $('#ttsEngine').value = state.settings.ttsEngine || 'gemini';
+  $('#geminiVoiceName').value = state.settings.geminiVoiceName || 'Aoede';
+  $('#botNameInput').value = state.settings.botName;
+  $('#aiProvider').value = state.settings.aiProvider;
+  $('#aiKey').value = state.settings.aiKey;
+  $('#speechRate').value = state.settings.speechRate;
+  $('#rateVal').textContent = state.settings.speechRate.toFixed(1);
+  $('#fontSize').value = state.settings.fontSize;
+  $('#fsVal').textContent = state.settings.fontSize;
+
+  $('#ttsEngine').onchange = () => {
+    $('#geminiVoiceWrap').className = $('#ttsEngine').value === 'gemini' ? '' : 'hidden';
+  };
+  $('#speechRate').oninput = e => { $('#rateVal').textContent = parseFloat(e.target.value).toFixed(1); };
+  $('#fontSize').oninput = e => { $('#fsVal').textContent = e.target.value; };
+}
+
+function closeModal(id){ $('#'+id).classList.add('hidden'); }
+function saveSettings(){
+  state.settings.ttsEngine = $('#ttsEngine').value;
+  state.settings.geminiVoiceName = $('#geminiVoiceName').value;
+  state.settings.botName = $('#botNameInput').value || 'أوفيس بوت';
+  state.settings.aiProvider = $('#aiProvider').value;
+  state.settings.aiKey = $('#aiKey').value;
+  state.settings.speechRate = parseFloat($('#speechRate').value);
+  state.settings.fontSize = parseInt($('#fontSize').value);
+  document.body.style.fontSize = state.settings.fontSize + 'px';
+  saveState();
+  closeModal('settingsModal');
+  toast('✓ ' + t('save'));
+  render();
+}
+
+function openEmbed(){
+  const m = $('#embedModal');
+  m.classList.remove('hidden');
+  const url = location.href.split('?')[0] + '?embed=true';
+  $('#embedCodeArea').value = `<iframe src="${url}" width="100%" height="700" style="border:none;border-radius:16px;" allow="microphone; autoplay" title="Smart Office Tutor"></iframe>`;
+}
+function copyEmbed(){
+  $('#embedCodeArea').select();
+  document.execCommand('copy');
+  toast(t('copied'));
+}
+function previewEmbed(){
+  const url = location.href.split('?')[0] + '?embed=true';
+  window.open(url, '_blank');
+}
+
+function init(){
+  applyTheme(state.theme);
+  setViewMode(state.viewMode, true);
+  document.body.style.fontSize = state.settings.fontSize + 'px';
+  document.documentElement.lang = state.lang;
+  document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+  $('#langLabel').textContent = state.lang === 'ar' ? 'EN' : 'ع';
+
+  if(state.auth && state.auth.loggedIn){
+    $('#topbar').classList.remove('hidden');
+    $('#sidebar').classList.remove('hidden');
+    renderNav();
+  } else {
+    state.page = 'splash';
+  }
+  render();
+  if('speechSynthesis' in window) window.speechSynthesis.getVoices();
+  $$('.modal-backdrop').forEach(m => m.addEventListener('click', e => { if(e.target === m) m.classList.add('hidden'); }));
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
