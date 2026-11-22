@@ -1,0 +1,2781 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="description" content="منصة تعليمية ذكية لتعليم Microsoft Word و PowerPoint">
+<title>مُعلّم أوفيس الذكي | Smart Office Tutor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1f5f9;--surface:#ffffff;--text:#0f172a;--muted:#64748b;--primary:#2563eb;--primary-soft:#dbeafe;--border:#e2e8f0;--success:#16a34a;--warn:#f59e0b;--danger:#dc2626}
+[data-theme="dark"]{--bg:#0b1120;--surface:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--border:#334155;--primary:#3b82f6;--primary-soft:#1e3a8a}
+[data-theme="blue"]{--bg:#eff6ff;--surface:#ffffff;--text:#1e3a8a;--muted:#3b82f6;--border:#bfdbfe;--primary:#1d4ed8;--primary-soft:#dbeafe}
+[data-theme="green"]{--bg:#f0fdf4;--surface:#ffffff;--text:#14532d;--muted:#16a34a;--border:#bbf7d0;--primary:#15803d;--primary-soft:#dcfce7}
+[data-theme="purple"]{--bg:#faf5ff;--surface:#ffffff;--text:#4c1d95;--muted:#8b5cf6;--border:#ddd6fe;--primary:#7c3aed;--primary-soft:#ede9fe}
+*{box-sizing:border-box}
+html,body{height:100%;min-height:100dvh}
+body{background:var(--bg);color:var(--text);font-family:'Cairo','Inter',sans-serif;margin:0;transition:background .3s,color .3s;overflow-x:hidden}
+[dir="ltr"] body{font-family:'Inter','Cairo',sans-serif}
+.surface{background:var(--surface);border:1px solid var(--border)}
+.text-muted{color:var(--muted)}
+.btn-primary{background:var(--primary);color:#fff;border:none;cursor:pointer;transition:all .2s}
+.btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-soft{background:var(--primary-soft);color:var(--primary);border:none;cursor:pointer;transition:all .2s}
+.btn-soft:hover{filter:brightness(.95)}
+.card-hover{transition:all .2s}.card-hover:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,.08)}
+
+/* Cute Animated Robot Splash */
+.splash-wrap{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(circle at top,var(--primary-soft),var(--bg) 70%)}
+.robot-float{animation:robotFloat 3s ease-in-out infinite}
+@keyframes robotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.robot-wave{transform-origin:78px 118px;animation:robotWave 2.2s ease-in-out infinite}
+@keyframes robotWave{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-26deg)}50%{transform:rotate(10deg)}75%{transform:rotate(-20deg)}}
+.robot-blink{transform-origin:center;animation:robotBlink 3.6s infinite}
+@keyframes robotBlink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(0.1)}}
+.antenna-glow{animation:antennaGlow 1.8s ease-in-out infinite}
+@keyframes antennaGlow{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.25)}}
+
+/* Device Preview Frames */
+.viewport-stage{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:calc(100dvh - 64px);transition:all .35s ease}
+.app-frame{width:100%;margin:0 auto;transition:all .4s cubic-bezier(0.22, 1, 0.36, 1);background:var(--bg);position:relative}
+.app-frame.desktop{max-width:100%;border-radius:0;box-shadow:none;border:none}
+.app-frame.laptop{max-width:1024px;min-height:680px;border-radius:16px 16px 4px 4px;border:10px solid #1e293b;border-bottom-width:18px;box-shadow:0 25px 60px -12px rgba(0,0,0,.35),0 0 0 2px #475569;padding:14px}
+.laptop-base{width:100%;max-width:1100px;height:14px;background:linear-gradient(180deg,#94a3b8 0%,#475569 100%);border-radius:0 0 16px 16px;box-shadow:0 10px 25px rgba(0,0,0,.25);margin:0 auto 16px auto;position:relative}
+.laptop-base::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:5px;background:#334155;border-radius:0 0 6px 6px}
+.app-frame.mobile{max-width:390px;min-height:720px;border-radius:38px;border:11px solid #0f172a;box-shadow:0 25px 65px -10px rgba(0,0,0,.45),0 0 0 3px #334155;padding:12px;padding-top:24px}
+.app-frame.mobile::before{content:'';display:block;width:104px;height:16px;background:#0f172a;border-radius:999px;margin:-16px auto 10px auto}
+.app-frame.mobile .grid-cols-2,.app-frame.mobile .md\:grid-cols-2,.app-frame.mobile .md\:grid-cols-3,.app-frame.mobile .md\:grid-cols-4{grid-template-columns:repeat(1,minmax(0,1fr))!important}
+.app-frame.mobile .md\:flex-row{flex-direction:column!important;align-items:flex-start!important}
+
+@media (max-width:767px){
+  .app-frame.laptop,.app-frame.mobile{max-width:100%!important;min-height:auto!important;border:none!important;border-radius:0!important;box-shadow:none!important;padding:0!important}
+  .app-frame.mobile::before,.laptop-base{display:none!important}
+}
+
+.view-btn{transition:all .2s;color:var(--muted)}
+.view-btn.active{background:var(--primary);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:4px;opacity:.4}
+.chat-user{background:var(--primary);color:#fff;border-radius:18px 18px 4px 18px;padding:10px 14px;max-width:85%;word-wrap:break-word}
+.chat-ai{background:var(--surface);border:1px solid var(--border);border-radius:18px 18px 18px 4px;padding:12px 16px;max-width:88%;word-wrap:break-word}
+[dir="ltr"] .chat-user{border-radius:18px 18px 18px 4px}
+[dir="ltr"] .chat-ai{border-radius:18px 18px 4px 18px}
+.pulse-rec{animation:pulse 1.2s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hidden{display:none!important}
+.fade-in{animation:fadeIn .3s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--surface);padding:12px 22px;border-radius:12px;z-index:9999;box-shadow:0 10px 25px rgba(0,0,0,.25);animation:fadeIn .3s;font-weight:600;font-size:14px}
+.sidebar-link.active{background:var(--primary-soft);color:var(--primary);font-weight:700}
+.chip{background:var(--primary-soft);color:var(--primary);padding:5px 12px;border-radius:999px;font-size:12px;cursor:pointer;border:none;transition:all .2s}
+.chip:hover{filter:brightness(.93)}
+.avatar-opt.selected{border-color:var(--primary);background:var(--primary-soft)}
+.audio-wave{display:inline-flex;align-items:center;gap:2px;height:14px}
+.audio-wave span{display:inline-block;width:3px;background:currentColor;border-radius:2px;animation:wave .8s infinite ease-in-out}
+.audio-wave span:nth-child(2){animation-delay:.15s}
+.audio-wave span:nth-child(3){animation-delay:.3s}
+.audio-wave span:nth-child(4){animation-delay:.45s}
+@keyframes wave{0%,100%{height:4px}50%{height:14px}}
+</style>
+</head>
+<body>
+
+<header id="topbar" class="surface border-b sticky top-0 z-40 shadow-sm hidden">
+  <div class="flex flex-wrap items-center justify-between px-3 py-2 gap-2">
+    <div class="flex items-center gap-2">
+      <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="القائمة"><i class="fas fa-bars"></i></button>
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold shadow-sm" style="background:var(--primary);"><i class="fas fa-robot"></i></div>
+      <div>
+        <span class="font-bold text-sm sm:text-base block leading-tight" id="brand">مُعلّم أوفيس الذكي</span>
+        <span class="text-[10px] text-muted hidden sm:inline-block" id="voiceBadgeTop"><i class="fas fa-volume-high text-blue-500"></i> المساعد الصوتي الذكي</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1 rounded-xl p-1 border" style="background:var(--bg);border-color:var(--border);" role="group" aria-label="وضع العرض">
+      <button onclick="setViewMode('desktop')" class="view-btn px-2 py-1.5 rounded-lg text-xs flex items-center gap-1" data-mode="desktop">
+        <i class="fas fa-desktop"></i><span class="hidden sm:inline" data-i18n="modeDesktop">كمبيوتر</span>
+      </button>
+      <button onclick="setViewMode('laptop')" class="view-btn px-2 py-1.5 rounded-lg text-xs flex items-center gap-1" data-mode="laptop">
+        <i class="fas fa-laptop"></i><span class="hidden sm:inline" data-i18n="modeLaptop">لابتوب</span>
+      </button>
+      <button onclick="setViewMode('mobile')" class="view-btn px-2 py-1.5 rounded-lg text-xs flex items-center gap-1" data-mode="mobile">
+        <i class="fas fa-mobile-screen-button"></i><span class="hidden sm:inline" data-i18n="modeMobile">موبايل</span>
+      </button>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <button id="globalStopAudioBtn" onclick="stopAllAudio()" class="hidden px-2.5 py-1.5 rounded-lg text-xs font-bold bg-red-100 text-red-700 hover:bg-red-200 items-center gap-1">
+        <span class="audio-wave"><span></span><span></span><span></span></span>
+        <span data-i18n="stopAudio">إيقاف</span>
+      </button>
+      <button onclick="cycleTheme()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="تغيير السمة"><i class="fas fa-moon" id="themeIcon"></i></button>
+      <button onclick="toggleLanguage()" class="px-2.5 py-1.5 rounded-lg text-xs font-bold btn-soft"><span id="langLabel">EN</span></button>
+      <button onclick="openSettings()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="الإعدادات"><i class="fas fa-cog"></i></button>
+      <button onclick="logoutSession()" class="p-2 rounded-lg hover:bg-red-50 text-red-600" title="تسجيل الخروج"><i class="fas fa-right-from-bracket"></i></button>
+    </div>
+  </div>
+</header>
+
+<div id="appShell" class="flex min-h-[calc(100dvh-56px)]">
+  <aside id="sidebar" class="surface w-64 shrink-0 p-3 hidden">
+    <nav id="navLinks" class="space-y-1"></nav>
+  </aside>
+
+  <main class="flex-1 p-2 sm:p-4 overflow-x-hidden">
+    <div id="viewportBanner" class="hidden text-center mb-2">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold surface shadow-sm">
+        <i id="viewportBannerIcon" class="fas fa-laptop text-blue-500"></i>
+        <span id="viewportBannerText">معاينة وضع اللابتوب (1024px)</span>
+        <button onclick="setViewMode('desktop')" class="underline text-blue-600 ms-2" data-i18n="resetDesktop">العودة للكمبيوتر</button>
+      </span>
+    </div>
+
+    <div class="viewport-stage">
+      <div id="appFrame" class="app-frame desktop">
+        <div id="pageContent" class="fade-in"></div>
+      </div>
+      <div id="laptopBase" class="laptop-base hidden"></div>
+    </div>
+  </main>
+</div>
+
+<div id="settingsModal" class="modal-backdrop hidden">
+  <div class="surface rounded-2xl p-5 w-full max-w-lg max-h-[88dvh] overflow-y-auto shadow-2xl">
+    <div class="flex justify-between items-center mb-4 pb-2 border-b" style="border-color:var(--border);">
+      <h2 class="text-xl font-bold"><i class="fas fa-cog text-blue-600"></i> <span data-i18n="settings">الإعدادات</span></h2>
+      <button onclick="closeModal('settingsModal')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="space-y-4">
+      <div class="p-3.5 rounded-xl border" style="border-color:var(--border);background:var(--bg);">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-bold text-sm flex items-center gap-2">
+            <i class="fas fa-cloud text-blue-600"></i>
+            <span>ربط قاعدة البيانات السحابية (Supabase)</span>
+          </div>
+          <span id="cloudStatusBadge" class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-blue-100 text-blue-700"></span>
+        </div>
+        <label class="block text-xs mb-1">Project URL</label>
+        <input id="sbUrlInput" type="text" placeholder="https://xxxx.supabase.co" class="w-full surface rounded-lg px-3 py-2 mb-2 text-xs font-mono" />
+        <label class="block text-xs mb-1">Anon Public Key</label>
+        <input id="sbAnonInput" type="password" placeholder="eyJhbGciOi..." class="w-full surface rounded-lg px-3 py-2 mb-2 text-xs font-mono" />
+        <button type="button" onclick="migrateLocalToCloud()" class="btn-soft w-full py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2">
+          <i class="fas fa-cloud-arrow-up"></i>
+          <span>ترحيل بياناتي المحلية إلى السحابة</span>
+        </button>
+      </div>
+
+      <div class="p-4 rounded-xl border-2 border-blue-400/40" style="background:var(--primary-soft);">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-bold text-sm flex items-center gap-2">
+            <i class="fas fa-volume-high text-blue-600"></i>
+            <span data-i18n="smartVoiceTitle">المساعد الصوتي الذكي (عربي / إنجليزي)</span>
+          </div>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-600 text-white font-bold">AR / EN</span>
+        </div>
+
+        <label class="block text-xs font-bold mb-1" data-i18n="ttsEngineLabel">محرك النطق الصوتي</label>
+        <select id="ttsEngine" class="w-full surface rounded-lg px-3 py-2 mb-3 text-sm font-semibold">
+          <option value="smart">المساعد الصوتي الذكي السحابي (عربي وإنجليزي واضح)</option>
+          <option value="browser">صوت المتصفح (عربي / إنجليزي تلقائي)</option>
+        </select>
+
+        <div id="geminiVoiceWrap">
+          <label class="block text-xs font-bold mb-1" data-i18n="voicePersonaLabel">اختيار نبرة الصوت</label>
+          <select id="geminiVoiceName" class="w-full surface rounded-lg px-3 py-2 mb-3 text-sm">
+            <option value="Aoede">Aoede — صوت أنثوي واضح ومشرق</option>
+            <option value="Kore">Kore — صوت أنثوي رصين وهادئ</option>
+            <option value="Sulafat">Sulafat — صوت دافئ وودود</option>
+            <option value="Puck">Puck — صوت ذكوري حيوي وواضح</option>
+            <option value="Charon">Charon — صوت ذكوري تعليمي رصين</option>
+            <option value="Fenrir">Fenrir — صوت ذكوري حماسي</option>
+          </select>
+
+          <button type="button" id="testVoiceBtn" onclick="testSmartVoice()" class="btn-primary w-full py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2">
+            <i class="fas fa-volume-high"></i>
+            <span data-i18n="testVoiceBtn">تجربة الصوت حسب لغة الواجهة</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-2" data-i18n="theme">السمة</label>
+        <div class="grid grid-cols-5 gap-2" id="themeGrid"></div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-2" data-i18n="avatar">شكل الروبوت</label>
+        <div class="grid grid-cols-6 gap-2" id="avatarGrid"></div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-2" data-i18n="botName">اسم الروبوت</label>
+        <input id="botNameInput" class="w-full surface rounded-lg px-3 py-2 text-sm" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold mb-1" data-i18n="speechRate">سرعة الصوت (<span id="rateVal">1.0</span>x)</label>
+          <input type="range" min="0.7" max="1.6" step="0.1" id="speechRate" class="w-full" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1" data-i18n="fontSize">حجم الخط (<span id="fsVal">16</span>px)</label>
+          <input type="range" min="13" max="20" id="fontSize" class="w-full" />
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="exportData()" class="btn-soft px-4 py-2 rounded-lg font-bold flex-1 text-sm"><i class="fas fa-download"></i> تصدير البيانات</button>
+        <button onclick="openResetConfirm()" class="px-4 py-2 rounded-lg font-bold flex-1 text-sm" style="background:#fee2e2;color:#991b1b;"><i class="fas fa-trash"></i> مسح الكل</button>
+      </div>
+    </div>
+
+    <div class="mt-5 flex justify-end">
+      <button onclick="saveSettings()" class="btn-primary px-6 py-2.5 rounded-xl font-bold text-sm" data-i18n="save">حفظ وإغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div id="resetConfirmModal" class="modal-backdrop hidden">
+  <div class="surface rounded-2xl p-5 w-full max-w-sm text-center shadow-2xl">
+    <div class="text-4xl text-red-500 mb-3"><i class="fas fa-triangle-exclamation"></i></div>
+    <h3 class="font-bold text-lg mb-2" data-i18n="confirmResetTitle">تأكيد مسح البيانات</h3>
+    <p class="text-sm text-muted mb-5" data-i18n="confirmResetDesc">سيتم مسح كافة الدروس المكتملة والمحادثات والنقاط المحلية. هل أنت متأكد؟</p>
+    <div class="flex gap-2">
+      <button onclick="closeModal('resetConfirmModal')" class="btn-soft py-2 rounded-xl font-bold flex-1 text-sm" data-i18n="cancel">إلغاء</button>
+      <button onclick="executeResetAll()" class="py-2 rounded-xl font-bold flex-1 text-sm bg-red-600 text-white" data-i18n="confirmYes">نعم، امسح الكل</button>
+    </div>
+  </div>
+</div>
+
+<div id="embedModal" class="modal-backdrop hidden">
+  <div class="surface rounded-2xl p-5 w-full max-w-lg shadow-2xl">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold"><i class="fas fa-code"></i> <span data-i18n="embedCode">كود التضمين</span></h2>
+      <button onclick="closeModal('embedModal')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><i class="fas fa-times"></i></button>
+    </div>
+    <p class="text-sm text-muted mb-3">انسخ الكود والصقه في أي موقع لتضمين الشات بوت فقط.</p>
+    <textarea id="embedCodeArea" class="w-full h-32 surface rounded-lg p-3 text-xs font-mono" readonly></textarea>
+    <div class="mt-3 flex gap-2">
+      <button onclick="copyEmbed()" class="btn-primary px-4 py-2 rounded-lg font-bold flex-1"><i class="fas fa-copy"></i> نسخ</button>
+      <button onclick="previewEmbed()" class="btn-soft px-4 py-2 rounded-lg font-bold flex-1"><i class="fas fa-external-link-alt"></i> معاينة</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script>
+const DEFAULT_CLOUD_CFG = {
+  supabaseUrl: 'https://idhmmfommmizbadojcoe.supabase.co',
+  supabaseAnonKey: 'sb_publishable_zBFC2VLPq9PxunP-_3TNcA_rJN4HayV'
+};
+const CLOUD_CFG_KEY = 'smartOfficeTutor_cloudCfg_v1';
+let cloudCfg = (() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CLOUD_CFG_KEY) || '{}');
+    return {
+      supabaseUrl: saved.supabaseUrl || DEFAULT_CLOUD_CFG.supabaseUrl,
+      supabaseAnonKey: saved.supabaseAnonKey || DEFAULT_CLOUD_CFG.supabaseAnonKey
+    };
+  } catch { return { ...DEFAULT_CLOUD_CFG }; }
+})();
+
+let sbClient = null;
+const cloudData = {
+  connected: false,
+  session: null,
+  profile: null,
+  users: [],
+  customLessons: [],
+  quizzes: [],
+  announcements: [],
+  userFiles: [],
+  adminLogs: [],
+  brandSettings: null,
+  uiConfig: { hiddenTabs: [], customTabs: [], deletedLessonIds: [] },
+  realtimeChannel: null
+};
+
+function initSupabaseClient(){
+  if(cloudCfg.supabaseUrl && cloudCfg.supabaseAnonKey && window.supabase){
+    try {
+      sbClient = window.supabase.createClient(cloudCfg.supabaseUrl, cloudCfg.supabaseAnonKey);
+      cloudData.connected = true;
+    } catch {
+      sbClient = null;
+      cloudData.connected = false;
+    }
+  } else {
+    sbClient = null;
+    cloudData.connected = false;
+  }
+}
+
+const KB = [
+  { id:'w-intro', lessonId:'w-u1-l1', title:'ما هو Microsoft Word؟',
+    keywords:['word','ما','هو','معالج','نصوص','مقدمة','بدء','start','word processing','برنامج'],
+    content:'Microsoft Word هو معالج نصوص (Word Processing) يستخدم الحاسوب لإنشاء وتحرير وطباعة المستندات. يسمح بحفظ الوثيقة والرجوع إليها لاحقاً، وتصحيح الأخطاء بسهولة، ويدعم لغات متعددة. لبدء العمل: 1) افتح قائمة Start. 2) اختر Microsoft Office. 3) انقر MS Word 2019. 4) من شاشة البداية اختر Blank document.',
+    source:'kafaa_word.pdf - الفصل الأول', url:'https://support.microsoft.com/word' },
+  { id:'w-features', lessonId:'w-u1-l2', title:'خصائص Microsoft Word',
+    keywords:['خصائص','ميزات','features','حماية','كلمة','مرور','فهرس','جداول','لغات','تدقيق'],
+    content:'من خصائص Word: 1) كتابة بلغات متعددة. 2) التدقيق الإملائي والنحوي. 3) إعداد الصفحة (الهوامش، الاتجاه، حجم الورق). 4) التنسيق (محاذاة، خط، لون، خلفية). 5) إدراج صور وأشكال. 6) جداول وفرز ومعادلات. 7) بحث واستبدال. 8) حماية بكلمة مرور. 9) حفظ كصفحة ويب أو قالب. 10) إعادة فتح مستند محفوظ. 11) معاينة الطباعة. 12) خصائص الملف. 13) فهرس المحتويات. 14) إدارة المراجع.',
+    source:'kafaa_word.pdf', url:'https://support.microsoft.com/word' },
+  { id:'w-qat', lessonId:'w-u2-l1', title:'شريط الوصول السريع QAT',
+    keywords:['qat','وصول','سريع','شريط','أدوات','undo','redo','save','تخصيص','إضافة'],
+    content:'QAT (شريط أدوات الوصول السريع) هو شريط أعلى يسار Word يحتوي: Save (حفظ)، Undo (تراجع)، Redo (إعادة). لإضافة أمر: 1) انقر سهم Customize بجانب QAT. 2) اختر More Commands. 3) اختر الأمر من القائمة. 4) اضغط Add ثم OK. للإزالة: انقر بزر الفأرة الأيمن على الأمر → Remove from Quick Access Toolbar.',
+    source:'kafaa_word.pdf ص4-6', url:'https://support.microsoft.com/en-us/office/customize-the-quick-access-toolbar' },
+  { id:'w-ribbon', lessonId:'w-u2-l2', title:'الشريط Ribbon والتبويبات',
+    keywords:['ribbon','شريط','تبويب','home','insert','design','layout','references','review','view','help','مجموعة'],
+    content:'الشريط Ribbon هو المنطقة أعلى مساحة العمل. يحتوي على تبويبات: Home، Insert، Design، Layout، References، Mailings، Review، View، Help. كل تبويب مقسم إلى مجموعات Groups تحتوي أزرار أوامر.',
+    source:'kafaa_word.pdf ص6' },
+  { id:'w-save', lessonId:'w-u6-l1', title:'حفظ المستند Save As',
+    keywords:['حفظ','save','as','pdf','docx','file','tab','ctrl','s','autosave'],
+    content:'للحفظ: File > Save As > اختر الموقع > اكتب الاسم > اختر الصيغة (.docx افتراضية أو .pdf) > Save. الحفظ المتكرر: Ctrl+S.',
+    source:'kafaa_word.pdf - الفصل الثاني', url:'https://support.microsoft.com/en-us/office/save-a-document-in-word' },
+  { id:'p-intro', lessonId:'p-u1-l1', title:'مقدمة إلى PowerPoint',
+    keywords:['powerpoint','بوربوينت','عرض','presentation','شريحة','slide','blank'],
+    content:'PowerPoint برنامج عروض تقديمية من Microsoft. ابدأ: File > New > Blank Presentation. أضف عنواناً في الشريحة الأولى واحفظ بـ Ctrl+S.',
+    source:'Microsoft Support', url:'https://support.microsoft.com/powerpoint' },
+  { id:'p-animation', lessonId:'p-u4-l1', title:'الحركات Animation vs الانتقالات Transitions',
+    keywords:['animation','حركة','transition','انتقال','animate','fade','fly','pane','slide'],
+    content:'Animation تحرك عنصراً داخل الشريحة. Transition تأثير الانتقال بين شريحة وأخرى.',
+    source:'Microsoft Support', url:'https://support.microsoft.com/powerpoint' }
+];
+
+const tL = o => (o && typeof o === 'object') ? (o[state.lang] || o.ar || o.en || '') : (o || '');
+const L = (ar, en) => ({ ar, en });
+
+const CUR = {
+  word: {
+    title: L('Microsoft Word','Microsoft Word'),
+    icon: 'fa-file-word', color: '#2b579a',
+    units: [
+      { id:'w-u1', title:L('الوحدة 1: مقدمة وخصائص Word','Unit 1: Word Intro & Features'), icon:'fa-book-open', color:'#2563eb',
+        lessons: [
+          { id:'w-u1-l1', icon:'fa-file-lines', title:L('ما هو Microsoft Word؟','What is Word?'),
+            objective:L('فهم معالج النصوص وأهمية Word','Understand word processing and Word'),
+            content:L('Word برنامج معالجة نصوص لإنشاء وتحرير وطباعة المستندات. يدعم لغات متعددة، تدقيق إملائي، جداول، صور، حماية بكلمة مرور، وفهارس تلقائية.','Word is a word processor for creating, editing, and printing documents. It supports multiple languages, spell check, tables, images, password protection, and auto TOC.'),
+            steps:L(['افتح Start > Microsoft Office > Word 2019.','اختر Blank document.','ابدأ الكتابة.','احفظ بـ Ctrl+S.'],['Open Start > Microsoft Office > Word 2019.','Choose Blank document.','Start typing.','Save with Ctrl+S.']),
+            tips:L('احفظ كل 5 دقائق بـ Ctrl+S','Save every 5 minutes with Ctrl+S'),
+            mistakes:L('نسيان الحفظ قبل الإغلاق','Forgetting to save before closing'),
+            summary:L('Word هو أداة معالجة النصوص الأشهر.','Word is the leading word processor.'),
+            image:'https://images.unsplash.com/photo-1517842645767-c639042777db?w=800',
+            quiz:[
+              {q:L('ما هو Word؟','What is Word?'),options:[L('برنامج معالجة نصوص','Word processor'),L('متصفح','Browser')],answer:0},
+              {q:L('اختصار الحفظ؟','Save shortcut?'),options:[L('Ctrl+S','Ctrl+S'),L('Ctrl+P','Ctrl+P')],answer:0}
+            ]
+          },
+          { id:'w-u1-l2', icon:'fa-list-check', title:L('خصائص Word','Word Features'),
+            objective:L('التعرف على خصائص Word الأساسية','Explore core Word features'),
+            content:L('من أبرز خصائص Word: الكتابة بلغات متعددة، التدقيق الإملائي والنحوي، إعداد الصفحة، التنسيق، إدراج الجداول والصور، البحث والاستبدال، وحماية الملفات.','Key Word features include multi-language typing, spell and grammar check, page setup, formatting, inserting tables and images, find and replace, and file protection.'),
+            steps:L(['جرّب التنسيق من تبويب Home.','أدرج جدولاً أو صورة من Insert.','احفظ المستند وراجع معاينة الطباعة.'],['Try formatting in the Home tab.','Insert a table or image from Insert.','Save the document and check print preview.']),
+            tips:L('استخدم الأنماط للعناوين لتسهيل الفهرسة','Use heading styles to make navigation and TOC easier'),
+            mistakes:L('الاعتماد على المسافات العشوائية للتنسيق','Relying on repeated spaces for alignment'),
+            summary:L('إتقان خصائص Word يختصر وقت إعداد المستندات.','Mastering Word features speeds up document creation.'),
+            image:'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800',quiz:[]
+          }
+        ]
+      },
+      { id:'w-u2', title:L('الوحدة 2: واجهة المستخدم','Unit 2: User Interface'), icon:'fa-window-maximize', color:'#0284c7',
+        lessons: [
+          { id:'w-u2-l1', icon:'fa-bolt', title:L('شريط الوصول السريع QAT','Quick Access Toolbar'),
+            objective:L('التعرف على QAT وتخصيصه','Learn and customize QAT'),
+            content:L('شريط الوصول السريع يقع أعلى يسار Word ويضم أوامر سريعة مثل Save وUndo وRedo مع إمكانية إضافة أوامر أخرى.','The Quick Access Toolbar sits at the top-left of Word and includes quick commands like Save, Undo, and Redo with customizable commands.'),
+            steps:L(['انقر سهم التخصيص بجانب QAT.','اختر More Commands.','اختر الأمر واضغط Add ثم OK.'],['Click the Customize arrow next to QAT.','Choose More Commands.','Select a command, click Add, then OK.']),
+            tips:L('أضف الأوامر الأكثر استخداماً إلى QAT','Pin your most frequent commands to QAT'),
+            mistakes:L('حذف أوامر أساسية دون حاجة','Removing essential commands unnecessarily'),
+            summary:L('QAT يوفر وصولاً فورياً للأوامر المهمة.','QAT provides one-click access to key commands.'),
+            image:'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800',
+            quiz:[{q:L('أين يقع شريط الوصول السريع؟','Where is QAT located?'),options:[L('أعلى يسار النافذة','Top-left of the window'),L('أسفل الشاشة','Bottom of the screen')],answer:0}]
+          }
+        ]
+      }
+    ]
+  },
+  powerpoint: {
+    title: L('Microsoft PowerPoint','Microsoft PowerPoint'),
+    icon: 'fa-file-powerpoint', color: '#b7472a',
+    units: [
+      { id:'p-u1', title:L('الوحدة 1: أساسيات العروض التقديمية','Unit 1: Presentation Basics'), icon:'fa-display', color:'#ea580c',
+        lessons: [
+          { id:'p-u1-l1', icon:'fa-presentation-screen', title:L('مقدمة إلى PowerPoint','Intro to PowerPoint'),
+            objective:L('فهم واجهة PowerPoint وإنشاء عرض جديد','Understand PowerPoint UI and create a presentation'),
+            content:L('PowerPoint هو برنامج إنشاء العروض التقديمية التفاعلية عبر الشرائح. يمكنك البدء من Blank Presentation أو اختيار قالب جاهز.','PowerPoint creates interactive slide presentations. You can start from a Blank Presentation or pick a ready-made template.'),
+            steps:L(['افتح PowerPoint.','اختر Blank Presentation.','أضف العنوان الرئيسي والعنوان الفرعي.','احفظ الملف بـ Ctrl+S.'],['Open PowerPoint.','Choose Blank Presentation.','Add main title and subtitle.','Save with Ctrl+S.']),
+            tips:L('اجعل نص كل شريحة مختصراً وواضحاً','Keep slide text concise and scannable'),
+            mistakes:L('حشو الشريحة بفقرات طويلة جداً','Stuffing slides with long blocks of text'),
+            summary:L('العرض التقديمي الناجح يجمع بين الوضوح والتصميم المتوازن.','Effective slides combine clarity with balanced visual design.'),
+            image:'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800',
+            quiz:[{q:L('ما الوظيفة الأساسية لـ PowerPoint؟','What is PowerPoint mainly used for?'),options:[L('إنشاء العروض التقديمية','Creating presentations'),L('إدارة قواعد البيانات','Managing databases')],answer:0}]
+          }
+        ]
+      },
+      { id:'p-u4', title:L('الوحدة 4: الحركات والانتقالات','Unit 4: Animations & Transitions'), icon:'fa-wand-magic-sparkles', color:'#c2410c',
+        lessons: [
+          { id:'p-u4-l1', icon:'fa-film', title:L('الحركات Animation والانتقالات Transitions','Animations vs Transitions'),
+            objective:L('التمييز بين حركة العناصر والانتقال بين الشرائح','Distinguish element animations from slide transitions'),
+            content:L('تُطبّق Animations على العناصر داخل الشريحة الواحدة، بينما تُطبّق Transitions عند الانتقال من شريحة إلى أخرى.','Animations apply to elements inside a slide, while Transitions apply when moving from one slide to another.'),
+            steps:L(['حدد عنصراً داخل الشريحة واختر حركة من Animations.','اختر شريحة وحدد تأثيراً من Transitions.','جرّب العرض من Slide Show.'],['Select an element and apply an effect from Animations.','Select a slide and choose an effect from Transitions.','Test in Slide Show mode.']),
+            tips:L('وحّد نمط الانتقالات في العرض لراحة المشاهد','Keep slide transitions consistent across the deck'),
+            mistakes:L('إضافة حركات مبالغ فيها تشتت الانتباه','Overusing flashy animations that distract viewers'),
+            summary:L('Animation للعناصر داخل الشريحة، وTransition بين الشرائح.','Animations animate slide objects; transitions move between slides.'),
+            image:'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800',
+            quiz:[{q:L('Animation تعمل على؟','Animation applies to?'),options:[L('عنصر داخل شريحة','An element inside a slide'),L('حفظ الملف فقط','Saving the file only')],answer:0}]
+          }
+        ]
+      }
+    ]
+  }
+};
+
+function getEffectiveCurriculum(){
+  const deleted = new Set(cloudData.uiConfig.deletedLessonIds || []);
+  const cloned = {};
+  for(const p of ['word','powerpoint']){
+    cloned[p] = {
+      ...CUR[p],
+      units: CUR[p].units.map(u => ({
+        ...u,
+        lessons: u.lessons.filter(l => !deleted.has(l.id))
+      }))
+    };
+    const extraLessons = (cloudData.customLessons || []).filter(cl => cl.program === p && cl.is_published !== false);
+    if(extraLessons.length){
+      cloned[p].units.push({
+        id: p + '-u-custom',
+        title: L('دروس إضافية (محدّثة سحابياً)', 'Additional Lessons (Cloud Updated)'),
+        icon: 'fa-cloud-arrow-up',
+        color: '#16a34a',
+        lessons: extraLessons.map(cl => ({
+          id: 'custom_' + cl.id,
+          icon: cl.icon || 'fa-star',
+          title: L(cl.title_ar, cl.title_en),
+          objective: L(cl.objective_ar || 'هدف تعليمي إضافي', cl.objective_en || 'Additional learning objective'),
+          content: L(cl.content_ar, cl.content_en),
+          steps: L(Array.isArray(cl.steps_ar)?cl.steps_ar:[], Array.isArray(cl.steps_en)?cl.steps_en:[]),
+          tips: L(cl.tips_ar || '', cl.tips_en || ''),
+          mistakes: L(cl.mistakes_ar || '', cl.mistakes_en || ''),
+          summary: L(cl.summary_ar || '', cl.summary_en || ''),
+          image: cl.image_url || '',
+          quiz: (cloudData.quizzes || []).filter(qz => qz.lesson_id === ('custom_' + cl.id)).map(qz => ({
+            q: L(qz.question_ar, qz.question_en),
+            options: (qz.options_ar || []).map((optAr, idx) => L(optAr, (qz.options_en || [])[idx] || optAr)),
+            answer: Number(qz.correct_index) || 0
+          }))
+        }))
+      });
+    }
+  }
+  return cloned;
+}
+
+function getEffectiveKB(){
+  const extra = (cloudData.customLessons || []).filter(cl => cl.is_published !== false).map(cl => ({
+    id: 'custom_kb_' + cl.id,
+    lessonId: 'custom_' + cl.id,
+    title: state.lang === 'ar' ? cl.title_ar : cl.title_en,
+    keywords: [cl.program, cl.title_ar, cl.title_en, cl.content_ar, cl.content_en].join(' ').toLowerCase().split(/\s+/),
+    content: state.lang === 'ar' ? cl.content_ar : cl.content_en,
+    source: state.lang === 'ar' ? 'قاعدة الدروس السحابية' : 'Cloud Curriculum',
+    url: ''
+  }));
+  return [...extra, ...KB];
+}
+
+const STORAGE_KEY = 'smartOfficeTutor_cloud_v5';
+const defaultState = {
+  lang:'ar', theme:'light', viewMode:'desktop', page:'splash',
+  auth:{ loggedIn:false, role:'user', email:'', password:'', username:'' },
+  user:{
+    id:'u_'+Math.random().toString(36).slice(2,8), name:'طالب',
+    points:0, level:1, badges:[], completedLessons:[], quizResults:{},
+    conversations:[], files:[]
+  },
+  settings:{
+    botName:'أوفيس بوت', avatar:'🤖', speechRate:1, fontSize:16,
+    aiProvider:'local', aiKey:'', customEndpoint:'',
+    ttsEngine:'smart', geminiVoiceName:'Aoede',
+    welcomeTitleAr:'أهلاً بك في مُعلّم أوفيس الآلي الذكي!',
+    welcomeTitleEn:'Welcome to Smart Office Tutor!',
+    welcomeDescAr:'رفيقك الذكي لإتقان مهارات Microsoft Word و PowerPoint .',
+    welcomeDescEn:'Your smart companion to master Microsoft Word and PowerPoint with interactive steps and clear voice.'
+  },
+  ctx:{ lessonId:null, program:null, conversationId:null, devTab:'users' }
+};
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return JSON.parse(JSON.stringify(defaultState));
+    return deepMerge(JSON.parse(JSON.stringify(defaultState)), JSON.parse(raw));
+  }catch{ return JSON.parse(JSON.stringify(defaultState)); }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function deepMerge(t,s){
+  for(const k in s){
+    if(s[k] && typeof s[k]==='object' && !Array.isArray(s[k])){
+      t[k] = deepMerge(t[k]||{}, s[k]);
+    } else t[k] = s[k];
+  }
+  return t;
+}
+
+const I18N = {
+  ar:{
+    dashboard:'الرئيسية', learning:'مركز التعلم', chatbot:'اسأل الروبوت',
+    lab:'مساحة التدريب', quizzes:'الاختبارات', skills:'المهارات',
+    library:'مكتبتي', profile:'ملفي', admin:'الإدارة', settings:'الإعدادات', embedCode:'تضمين',
+    welcome:'أهلًا', progress:'التقدم', lessonsDone:'دروس مكتملة',
+    badges:'الشارات', points:'نقاط', lastLesson:'آخر درس', nextLesson:'الدرس التالي',
+    quickAccess:'وصول سريع', word:'Word', powerpoint:'PowerPoint',
+    startLearning:'ابدأ التعلم', continueLearning:'استكمل', units:'وحدات',
+    lesson:'درس', objective:'الهدف', steps:'الخطوات', tips:'نصائح',
+    mistakes:'أخطاء شائعة', summary:'ملخص', quiz:'اختبر نفسك',
+    prev:'السابق', next:'التالي', askBot:'اسأل الروبوت',
+    markDone:'تم إكمال الدرس', done:'مكتمل', sendMessage:'اكتب سؤالك هنا...',
+    voiceInput:'تحدث بصوتك', listen:'استمع', listenLesson:'استمع للدرس',
+    stopAudio:'إيقاف', loadingAudio:'جاري التجهيز الصوتي...',
+    newChat:'محادثة جديدة', history:'المحادثات', suggestedQs:'أسئلة مقترحة', quizTitle:'اختبار',
+    submit:'إرسال', correct:'صحيح', wrong:'خطأ', score:'الدرجة',
+    theme:'السمة', avatar:'شكل الروبوت', botName:'اسم الروبوت',
+    speechRate:'سرعة الصوت', fontSize:'حجم الخط', save:'حفظ وإغلاق',
+    light:'فاتح', dark:'داكن', blue:'أزرق', green:'أخضر', purple:'بنفسجي',
+    noData:'لا توجد بيانات بعد', aiThinking:'الروبوت يفكر...', question:'سؤال',
+    errorOccurred:'حدث خطأ', copied:'تم النسخ', sources:'مصادر',
+    askAnything:'اسألني أي شيء عن Word أو PowerPoint',
+    modeDesktop:'كمبيوتر', modeLaptop:'لابتوب', modeMobile:'موبايل', resetDesktop:'العودة للكمبيوتر',
+    smartVoiceTitle:'المساعد الصوتي الذكي (عربي / إنجليزي)',
+    ttsEngineLabel:'محرك النطق الصوتي', voicePersonaLabel:'اختيار نبرة الصوت',
+    testVoiceBtn:'تجربة الصوت حسب لغة الواجهة',
+    confirmResetTitle:'تأكيد مسح البيانات',
+    confirmResetDesc:'سيتم مسح كافة الدروس المكتملة والمحادثات والنقاط المحلية. هل أنت متأكد؟',
+    cancel:'إلغاء', confirmYes:'نعم، امسح الكل',
+    splashStart:'بدء',
+    chooseRoleTitle:'كيف تود الدخول إلى المنصة؟',
+    roleUserTitle:'مستخدم', roleUserDesc:'دخول بحساب طالب لمتابعة الدروس والاختبارات والشات بوت ومساحة التدريب',
+    roleDevTitle:'مطوّر', roleDevDesc:'دخول بحساب المطوّر لإدارة المستخدمين والدروس والاختبارات والإعلانات والملفات',
+    backToRole:'العودة لاختيار النوع'
+  },
+  en:{
+    dashboard:'Dashboard', learning:'Learning', chatbot:'Ask Bot',
+    lab:'Practice Lab', quizzes:'Quizzes', skills:'Skills',
+    library:'Library', profile:'Profile', admin:'Admin', settings:'Settings', embedCode:'Embed',
+    welcome:'Welcome', progress:'Progress', lessonsDone:'Lessons',
+    badges:'Badges', points:'Points', lastLesson:'Last Lesson', nextLesson:'Next Lesson',
+    quickAccess:'Quick Access', word:'Word', powerpoint:'PowerPoint',
+    startLearning:'Start', continueLearning:'Continue', units:'Units',
+    lesson:'Lesson', objective:'Objective', steps:'Steps', tips:'Tips',
+    mistakes:'Common Mistakes', summary:'Summary', quiz:'Quiz',
+    prev:'Previous', next:'Next', askBot:'Ask Bot',
+    markDone:'Mark Complete', done:'Done', sendMessage:'Type your question...',
+    voiceInput:'Voice Input', listen:'Listen', listenLesson:'Listen to Lesson',
+    stopAudio:'Stop', loadingAudio:'Preparing Audio...',
+    newChat:'New Chat', history:'History', suggestedQs:'Suggested', quizTitle:'Quiz',
+    submit:'Submit', correct:'Correct', wrong:'Wrong', score:'Score',
+    theme:'Theme', avatar:'Bot Avatar', botName:'Bot Name',
+    speechRate:'Speech Rate', fontSize:'Font Size', save:'Save & Close',
+    light:'Light', dark:'Dark', blue:'Blue', green:'Green', purple:'Purple',
+    noData:'No data yet', aiThinking:'Bot is thinking...', question:'Question',
+    errorOccurred:'An error occurred', copied:'Copied', sources:'Sources',
+    askAnything:'Ask me anything about Word or PowerPoint',
+    modeDesktop:'Desktop', modeLaptop:'Laptop', modeMobile:'Mobile', resetDesktop:'Back to Desktop',
+    smartVoiceTitle:'Smart Voice Assistant (Arabic / English)',
+    ttsEngineLabel:'Speech Engine', voicePersonaLabel:'Select Voice Persona',
+    testVoiceBtn:'Test Voice in Current Language',
+    confirmResetTitle:'Confirm Data Reset',
+    confirmResetDesc:'All local completed lessons, chats, and points will be cleared. Are you sure?',
+    cancel:'Cancel', confirmYes:'Yes, Reset All',
+    splashStart:'Start',
+    chooseRoleTitle:'How would you like to sign in?',
+    roleUserTitle:'User', roleUserDesc:'Sign in as a student to access lessons, quizzes, AI tutor, and practice lab',
+    roleDevTitle:'Developer', roleDevDesc:'Sign in as a developer to manage users, lessons, quizzes, announcements, and files',
+    backToRole:'Back to Role Selection'
+  }
+};
+const t = k => (I18N[state.lang] && I18N[state.lang][k]) || k;
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const esc = s => String(s||'').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const isDev = () => state.auth && state.auth.role === 'developer';
+
+function allLessons(){
+  const cur = getEffectiveCurriculum();
+  const out = [];
+  for(const p in cur){
+    for(const u of cur[p].units){
+      for(const l of u.lessons){
+        out.push({...l, unit:u, program:p});
+      }
+    }
+  }
+  return out;
+}
+function programLessons(p){ return allLessons().filter(l => l.program === p); }
+function findLesson(id){ return allLessons().find(l => l.id === id); }
+function totalLessons(){ return allLessons().length; }
+function progressPct(){
+  const total = totalLessons();
+  const done = state.user.completedLessons.length;
+  return total ? Math.min(100, Math.round(done/total*100)) : 0;
+}
+function toast(msg, ms=2500){
+  const el = $('#toast');
+  el.textContent = msg;
+  el.className = 'toast';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => { el.className = 'hidden'; }, ms);
+}
+
+/* Cloud Sync & Auth */
+async function syncFromCloud(){
+  if(!sbClient || !cloudData.session) return;
+  const uid = cloudData.session.user.id;
+  try {
+    const [{ data: prof }, { data: prog }, { data: qRes }, { data: convs }, { data: custLes }, { data: qzs }, { data: anns }, { data: setts }, { data: files }] = await Promise.all([
+      sbClient.from('profiles').select('*').eq('id', uid).maybeSingle(),
+      sbClient.from('learning_progress').select('lesson_id').eq('user_id', uid).eq('completed', true),
+      sbClient.from('quiz_results').select('*').eq('user_id', uid),
+      sbClient.from('conversations').select('*').eq('user_id', uid).order('updated_at', { ascending: false }),
+      sbClient.from('custom_lessons').select('*').order('created_at', { ascending: false }),
+      sbClient.from('quizzes').select('*').order('created_at', { ascending: false }),
+      sbClient.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }),
+      sbClient.from('app_settings').select('*'),
+      sbClient.from('user_files').select('*').order('created_at', { ascending: false })
+    ]);
+
+    if(prof){
+      if(prof.is_active === false){
+        await sbClient.auth.signOut();
+        toast(state.lang==='ar' ? 'تم إيقاف هذا الحساب من قِبل الإدارة.' : 'This account has been suspended.');
+        state.auth.loggedIn = false;
+        state.page = 'user_login';
+        return;
+      }
+      cloudData.profile = prof;
+      state.auth.role = prof.role === 'developer' ? 'developer' : 'user';
+      state.auth.email = prof.email || cloudData.session.user.email || '';
+      state.user.id = prof.id;
+      state.user.name = prof.full_name || state.user.name;
+      state.user.points = Number(prof.points) || 0;
+      state.user.level = Number(prof.level) || 1;
+      state.user.badges = Array.isArray(prof.badges) ? prof.badges : [];
+      if(prof.avatar) state.settings.avatar = prof.avatar;
+      await sbClient.from('profiles').update({ last_seen_at: new Date().toISOString() }).eq('id', uid);
+    }
+
+    if(Array.isArray(prog)){
+      state.user.completedLessons = prog.map(p => p.lesson_id);
+    }
+    if(Array.isArray(qRes)){
+      const map = {};
+      qRes.forEach(r => { map[r.lesson_id] = { score: r.score, total: r.total, time: new Date(r.attempted_at).getTime() }; });
+      state.user.quizResults = map;
+    }
+    if(Array.isArray(convs) && convs.length){
+      const loadedConvs = [];
+      for(const c of convs.slice(0, 15)){
+        const { data: msgs } = await sbClient.from('messages').select('*').eq('conversation_id', c.id).order('created_at', { ascending: true });
+        loadedConvs.push({
+          id: 'cloud_' + c.id,
+          dbId: c.id,
+          title: c.title || '',
+          messages: (msgs || []).map(m => ({ role: m.role, content: m.content, sources: m.sources || [], time: new Date(m.created_at).getTime() }))
+        });
+      }
+      state.user.conversations = loadedConvs;
+      if(!state.ctx.conversationId && loadedConvs.length){
+        state.ctx.conversationId = loadedConvs[0].id;
+      }
+    }
+
+    cloudData.customLessons = custLes || [];
+    cloudData.quizzes = qzs || [];
+    cloudData.announcements = anns || [];
+    cloudData.userFiles = files || [];
+    state.user.files = (files || []).filter(f => f.user_id === uid).map(f => ({
+      id: f.id, name: f.file_name, size: f.file_size, task: f.task_id, status: f.review_status, time: new Date(f.created_at).getTime()
+    }));
+
+    if(Array.isArray(setts)){
+      const bRow = setts.find(s => s.key === 'branding');
+      const uRow = setts.find(s => s.key === 'ui_config');
+      if(bRow?.value){
+        cloudData.brandSettings = bRow.value;
+        if(bRow.value.botName) state.settings.botName = bRow.value.botName;
+        if(bRow.value.welcomeTitleAr) state.settings.welcomeTitleAr = bRow.value.welcomeTitleAr;
+        if(bRow.value.welcomeTitleEn) state.settings.welcomeTitleEn = bRow.value.welcomeTitleEn;
+        if(bRow.value.welcomeDescAr) state.settings.welcomeDescAr = bRow.value.welcomeDescAr;
+        if(bRow.value.welcomeDescEn) state.settings.welcomeDescEn = bRow.value.welcomeDescEn;
+      }
+      if(uRow?.value){
+        cloudData.uiConfig = {
+          hiddenTabs: Array.isArray(uRow.value.hiddenTabs) ? uRow.value.hiddenTabs : [],
+          customTabs: Array.isArray(uRow.value.customTabs) ? uRow.value.customTabs : [],
+          deletedLessonIds: Array.isArray(uRow.value.deletedLessonIds) ? uRow.value.deletedLessonIds : []
+        };
+      }
+    }
+
+    if(state.auth.role === 'developer'){
+      await fetchDeveloperAdminData();
+    }
+
+    saveState();
+  } catch (e) {
+    console.warn('Cloud sync fallback:', e);
+  }
+}
+
+async function fetchDeveloperAdminData(){
+  if(!sbClient || state.auth.role !== 'developer') return;
+  try {
+    const [{ data: allProfs }, { data: logs }] = await Promise.all([
+      sbClient.from('profiles').select('*').order('created_at', { ascending: false }),
+      sbClient.from('admin_logs').select('*').order('created_at', { ascending: false }).limit(30)
+    ]);
+    cloudData.users = allProfs || [];
+    cloudData.adminLogs = logs || [];
+  } catch {}
+}
+
+async function logAdminAction(action, targetType, targetId='', details={}){
+  if(!sbClient || !cloudData.session || state.auth.role !== 'developer') return;
+  try {
+    await sbClient.from('admin_logs').insert({
+      admin_id: cloudData.session.user.id,
+      action,
+      target_type: targetType,
+      target_id: targetId,
+      details
+    });
+    await fetchDeveloperAdminData();
+  } catch {}
+}
+
+function setupRealtimeSubscriptions(){
+  if(!sbClient || cloudData.realtimeChannel) return;
+  try {
+    cloudData.realtimeChannel = sbClient.channel('smart-office-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'custom_lessons' }, async () => {
+        await syncFromCloud();
+        render();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, async () => {
+        await syncFromCloud();
+        render();
+        toast(state.lang==='ar' ? '📢 تم تحديث الإعلانات السحابية' : '📢 Cloud announcements updated');
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, async () => {
+        await syncFromCloud();
+        renderNav();
+        render();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, async () => {
+        if(state.auth.role === 'developer'){
+          await fetchDeveloperAdminData();
+          if(state.page === 'admin' || state.page === 'dashboard') render();
+        }
+      })
+      .subscribe();
+  } catch {}
+}
+
+async function migrateLocalToCloud(){
+  if(!sbClient || !cloudData.session){
+    toast(state.lang==='ar' ? 'يرجى ربط Supabase وتسجيل الدخول أولاً' : 'Please connect Supabase and sign in first');
+    return;
+  }
+  const uid = cloudData.session.user.id;
+  try {
+    for(const lid of state.user.completedLessons){
+      await sbClient.from('learning_progress').upsert({
+        user_id: uid,
+        lesson_id: lid,
+        program: lid.startsWith('p-') ? 'powerpoint' : 'word',
+        completed: true
+      }, { onConflict: 'user_id,lesson_id' });
+    }
+    for(const [qid, res] of Object.entries(state.user.quizResults || {})){
+      await sbClient.from('quiz_results').upsert({
+        user_id: uid,
+        lesson_id: qid,
+        score: res.score,
+        total: res.total
+      }, { onConflict: 'user_id,lesson_id' });
+    }
+    await sbClient.from('profiles').update({
+      full_name: state.user.name,
+      points: state.user.points,
+      level: state.user.level,
+      badges: state.user.badges,
+      avatar: state.settings.avatar
+    }).eq('id', uid);
+
+    await syncFromCloud();
+    toast(state.lang==='ar' ? '✅ تم ترحيل بياناتك المحلية للسحابة بنجاح' : '✅ Local data migrated to cloud');
+    render();
+  } catch (e) {
+    toast(e.message || t('errorOccurred'));
+  }
+}
+
+/* Bilingual Smart Voice Engine */
+let currentAudioPlayer = null;
+const ttsCache = new Map();
+
+function stopAllAudio(){
+  if(currentAudioPlayer){
+    currentAudioPlayer.pause();
+    currentAudioPlayer.currentTime = 0;
+    currentAudioPlayer = null;
+  }
+  if('speechSynthesis' in window){
+    window.speechSynthesis.cancel();
+  }
+  const stopBtn = $('#globalStopAudioBtn');
+  if(stopBtn){ stopBtn.classList.add('hidden'); stopBtn.classList.remove('flex'); }
+}
+
+function showAudioPlayingUI(show){
+  const stopBtn = $('#globalStopAudioBtn');
+  if(!stopBtn) return;
+  if(show){ stopBtn.classList.remove('hidden'); stopBtn.classList.add('flex'); }
+  else { stopBtn.classList.add('hidden'); stopBtn.classList.remove('flex'); }
+}
+
+function detectSpeechLanguage(text){
+  const clean = String(text || '').trim();
+  const arCount = (clean.match(/[\u0600-\u06FF]/g) || []).length;
+  const enCount = (clean.match(/[A-Za-z]/g) || []).length;
+  if(arCount === 0 && enCount === 0) return state.lang === 'en' ? 'en' : 'ar';
+  if(state.lang === 'en'){
+    return enCount >= arCount ? 'en' : 'ar';
+  }
+  return arCount >= enCount ? 'ar' : 'en';
+}
+
+function base64ToArrayBuffer(base64){
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for(let i=0;i<len;i++) bytes[i] = binaryString.charCodeAt(i);
+  return bytes.buffer;
+}
+
+function pcmToWav(pcm16, sampleRate = 24000){
+  const numChannels = 1;
+  const byteRate = sampleRate * numChannels * 2;
+  const blockAlign = numChannels * 2;
+  const dataSize = pcm16.length * 2;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+  const writeString = (offset, string) => {
+    for(let i=0;i<string.length;i++) view.setUint8(offset+i, string.charCodeAt(i));
+  };
+  writeString(0,'RIFF');
+  view.setUint32(4,36+dataSize,true);
+  writeString(8,'WAVE');
+  writeString(12,'fmt ');
+  view.setUint32(16,16,true);
+  view.setUint16(20,1,true);
+  view.setUint16(22,numChannels,true);
+  view.setUint32(24,sampleRate,true);
+  view.setUint32(28,byteRate,true);
+  view.setUint16(32,blockAlign,true);
+  view.setUint16(34,16,true);
+  writeString(36,'data');
+  view.setUint32(40,dataSize,true);
+  let offset = 44;
+  for(let i=0;i<pcm16.length;i++,offset+=2) view.setInt16(offset,pcm16[i],true);
+  return new Blob([buffer],{type:'audio/wav'});
+}
+
+function speakBrowserByLang(cleanText, targetLang){
+  if(!('speechSynthesis' in window)){
+    toast(targetLang === 'ar' ? 'المتصفح لا يدعم النطق الصوتي' : 'Speech synthesis not supported');
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(cleanText);
+  u.lang = targetLang === 'en' ? 'en-US' : 'ar-SA';
+  u.rate = state.settings.speechRate || 1.0;
+  const voices = window.speechSynthesis.getVoices();
+  const prefix = targetLang === 'en' ? 'en' : 'ar';
+  const match = voices.find(v => v.lang.toLowerCase().startsWith(prefix));
+  if(match) u.voice = match;
+  u.onstart = () => showAudioPlayingUI(true);
+  u.onend = () => showAudioPlayingUI(false);
+  u.onerror = () => showAudioPlayingUI(false);
+  window.speechSynthesis.speak(u);
+}
+
+async function speakText(rawText, btnEl = null, forcedLang = null){
+  stopAllAudio();
+  const cleanText = String(rawText || '')
+    .replace(/[*_#`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if(!cleanText) return;
+
+  const targetLang = forcedLang || detectSpeechLanguage(cleanText);
+
+  if(state.settings.ttsEngine === 'browser' || !sbClient || !cloudData.session){
+    speakBrowserByLang(cleanText, targetLang);
+    return;
+  }
+
+  const origHtml = btnEl ? btnEl.innerHTML : null;
+  if(btnEl){
+    btnEl.disabled = true;
+    btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('loadingAudio')}`;
+  }
+
+  const voiceName = state.settings.geminiVoiceName || 'Aoede';
+  const cacheKey = `${targetLang}::${voiceName}::${cleanText}`;
+
+  try {
+    let audioUrl = ttsCache.get(cacheKey);
+    if(!audioUrl){
+      const { data, error } = await sbClient.functions.invoke('gemini-tutor', {
+        body: {
+          action: 'tts',
+          text: cleanText.slice(0, 1500),
+          voiceName,
+          lang: targetLang
+        }
+      });
+      if(error || !data?.audioBase64) throw new Error('TTS unavailable');
+      const rateMatch = String(data.mimeType || 'audio/L16;rate=24000').match(/rate=(\d+)/);
+      const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+      const pcm16 = new Int16Array(base64ToArrayBuffer(data.audioBase64));
+      const wavBlob = pcmToWav(pcm16, sampleRate);
+      audioUrl = URL.createObjectURL(wavBlob);
+      ttsCache.set(cacheKey, audioUrl);
+    }
+
+    const audio = new Audio(audioUrl);
+    audio.playbackRate = state.settings.speechRate || 1.0;
+    currentAudioPlayer = audio;
+    audio.onplay = () => showAudioPlayingUI(true);
+    audio.onended = () => { showAudioPlayingUI(false); currentAudioPlayer = null; };
+    audio.onerror = () => { showAudioPlayingUI(false); speakBrowserByLang(cleanText, targetLang); };
+    await audio.play();
+  } catch {
+    speakBrowserByLang(cleanText, targetLang);
+  } finally {
+    if(btnEl && origHtml){
+      btnEl.disabled = false;
+      btnEl.innerHTML = origHtml;
+    }
+  }
+}
+
+function testSmartVoice(){
+  state.settings.ttsEngine = $('#ttsEngine').value;
+  state.settings.geminiVoiceName = $('#geminiVoiceName').value;
+  state.settings.speechRate = parseFloat($('#speechRate').value) || 1.0;
+  const sample = state.lang === 'ar'
+    ? 'مرحباً بك في مُعلّم أوفيس الذكي! هذا هو الصوت العربي الواضح لشرح دروس وورد وباوربوينت.'
+    : 'Welcome to Smart Office Tutor! This is the clear English voice for your Word and PowerPoint lessons.';
+  speakText(sample, $('#testVoiceBtn'), state.lang);
+}
+
+function speakCurrentLesson(btnEl){
+  const info = findLesson(state.ctx.lessonId);
+  if(!info) return;
+  const lang = state.lang === 'en' ? 'en' : 'ar';
+  const title = info.title?.[lang] || info.title?.ar || '';
+  const obj = info.objective?.[lang] || info.objective?.ar || '';
+  const content = info.content?.[lang] || info.content?.ar || '';
+  const stepsArr = Array.isArray(info.steps?.[lang]) ? info.steps[lang] : (Array.isArray(info.steps?.ar) ? info.steps.ar : []);
+  const textToRead = lang === 'ar'
+    ? `درس: ${title}. الهدف: ${obj}. الشرح: ${content}. الخطوات: ${stepsArr.join('. ')}.`
+    : `Lesson: ${title}. Objective: ${obj}. Explanation: ${content}. Steps: ${stepsArr.join('. ')}.`;
+  speakText(textToRead, btnEl, lang);
+}
+
+/* Splash & Auth Screens */
+function renderCuteRobotSvg(){
+  return `
+    <svg viewBox="0 0 180 180" class="w-40 h-40 sm:w-44 sm:h-44 mx-auto robot-float" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle class="antenna-glow" cx="90" cy="18" r="9" fill="#3b82f6"/>
+      <line x1="90" y1="27" x2="90" y2="46" stroke="#64748b" stroke-width="5" stroke-linecap="round"/>
+      <rect x="42" y="46" width="96" height="68" rx="26" fill="#ffffff" stroke="#2563eb" stroke-width="4"/>
+      <rect x="53" y="58" width="74" height="44" rx="16" fill="#0f172a"/>
+      <g class="robot-blink">
+        <circle cx="73" cy="79" r="9" fill="#38bdf8"/>
+        <circle cx="76" cy="76" r="3" fill="#ffffff"/>
+        <circle cx="107" cy="79" r="9" fill="#38bdf8"/>
+        <circle cx="110" cy="76" r="3" fill="#ffffff"/>
+      </g>
+      <path d="M77 92C81 97 99 97 103 92" stroke="#4ade80" stroke-width="3.5" stroke-linecap="round"/>
+      <rect x="50" y="118" width="80" height="44" rx="18" fill="#2563eb"/>
+      <rect x="68" y="129" width="44" height="18" rx="7" fill="#dbeafe"/>
+      <circle cx="80" cy="138" r="3.5" fill="#2563eb"/>
+      <circle cx="90" cy="138" r="3.5" fill="#16a34a"/>
+      <circle cx="100" cy="138" r="3.5" fill="#f59e0b"/>
+      <g class="robot-wave">
+        <path d="M130 124C146 114 156 98 158 84" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="159" cy="80" r="8" fill="#fbbf24"/>
+      </g>
+      <rect x="28" y="122" width="20" height="9" rx="4.5" fill="#60a5fa"/>
+      <rect x="64" y="162" width="18" height="10" rx="5" fill="#1e293b"/>
+      <rect x="98" y="162" width="18" height="10" rx="5" fill="#1e293b"/>
+    </svg>
+  `;
+}
+
+function viewSplash(){
+  const title = state.lang === 'ar' ? state.settings.welcomeTitleAr : state.settings.welcomeTitleEn;
+  const desc = state.lang === 'ar' ? state.settings.welcomeDescAr : state.settings.welcomeDescEn;
+  return `
+    <div class="splash-wrap rounded-3xl">
+      <div class="surface rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-xl">
+        <div class="flex justify-between items-center mb-3">
+          <button onclick="cycleTheme()" class="p-2 rounded-xl btn-soft text-xs"><i class="fas fa-moon"></i></button>
+          <span class="text-xs font-bold px-3 py-1 rounded-full btn-soft"><i class="fas fa-cloud"></i> Cloud Ready</span>
+          <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-xl btn-soft text-xs font-bold">${state.lang==='ar'?'EN':'ع'}</button>
+        </div>
+        ${renderCuteRobotSvg()}
+        <h1 class="text-2xl sm:text-3xl font-extrabold mt-3 mb-2">${esc(title)}</h1>
+        <p class="text-sm text-muted leading-relaxed mb-6">${esc(desc)}</p>
+        <button onclick="goToRoleSelect()" class="btn-primary w-full py-3.5 rounded-2xl font-extrabold text-base shadow-lg flex items-center justify-center gap-2">
+          <span>${t('splashStart')}</span>
+          <i class="fas fa-arrow-${state.lang==='ar'?'left':'right'}"></i>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function goToRoleSelect(){
+  state.page = 'role_select';
+  saveState();
+  render();
+}
+
+function viewRoleSelect(){
+  return `
+    <div class="splash-wrap rounded-3xl">
+      <div class="surface rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <button onclick="state.page='splash';saveState();render();" class="text-xs text-muted hover:underline"><i class="fas fa-arrow-${state.lang==='ar'?'right':'left'}"></i> ${state.lang==='ar'?'الترحيب':'Welcome'}</button>
+          <button onclick="toggleLanguage()" class="px-2.5 py-1 rounded-lg btn-soft text-xs font-bold">${state.lang==='ar'?'EN':'ع'}</button>
+        </div>
+        <div class="text-center mb-5">
+          <div class="text-4xl mb-2">${state.settings.avatar}</div>
+          <h1 class="text-xl sm:text-2xl font-extrabold">${t('chooseRoleTitle')}</h1>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <button onclick="chooseRole('user')" class="surface p-4 rounded-2xl text-start card-hover border-2" style="border-color:var(--primary);">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white text-lg mb-3" style="background:var(--primary);"><i class="fas fa-user-graduate"></i></div>
+            <div class="font-extrabold text-base mb-1">${t('roleUserTitle')}</div>
+            <div class="text-xs text-muted leading-relaxed">${t('roleUserDesc')}</div>
+          </button>
+          <button onclick="chooseRole('developer')" class="surface p-4 rounded-2xl text-start card-hover border-2" style="border-color:#7c3aed;">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white text-lg mb-3 bg-purple-600"><i class="fas fa-user-shield"></i></div>
+            <div class="font-extrabold text-base mb-1">${t('roleDevTitle')}</div>
+            <div class="text-xs text-muted leading-relaxed">${t('roleDevDesc')}</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function chooseRole(role){
+  state.page = role === 'developer' ? 'dev_login' : 'user_login';
+  saveState();
+  render();
+}
+
+function viewUserAuth(){
+  return `
+    <div class="splash-wrap rounded-3xl">
+      <div class="surface rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <button onclick="goToRoleSelect()" class="text-xs text-muted hover:underline"><i class="fas fa-arrow-${state.lang==='ar'?'right':'left'}"></i> ${t('backToRole')}</button>
+          <button onclick="toggleLanguage()" class="px-2.5 py-1 rounded-lg btn-soft text-xs font-bold">${state.lang==='ar'?'EN':'ع'}</button>
+        </div>
+        <div class="text-center mb-4">
+          <div class="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center text-white text-xl mb-2" style="background:var(--primary);"><i class="fas fa-user-graduate"></i></div>
+          <h1 class="text-xl font-extrabold">${state.lang==='ar'?'حساب المستخدم (الطالب)':'Student Cloud Account'}</h1>
+          <p class="text-xs text-muted mt-1">${cloudData.connected ? '🟢 متصل بقاعدة البيانات السحابية' : '🟡 وضع محلي (يمكن ربط Supabase من الإعدادات)'}</p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-1.5 p-1 rounded-xl mb-4" style="background:var(--bg);">
+          <button type="button" onclick="switchAuthTab('login')" id="tabLoginBtn" class="py-1.5 rounded-lg text-xs font-bold btn-primary">دخول</button>
+          <button type="button" onclick="switchAuthTab('signup')" id="tabSignupBtn" class="py-1.5 rounded-lg text-xs font-bold btn-soft">حساب جديد</button>
+          <button type="button" onclick="switchAuthTab('reset')" id="tabResetBtn" class="py-1.5 rounded-lg text-xs font-bold btn-soft">استعادة</button>
+        </div>
+
+        <form id="authLoginForm" onsubmit="submitCloudUserAuth('login', event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold mb-1">البريد الإلكتروني أو الاسم</label>
+            <input id="authLoginEmail" type="text" required placeholder="student@example.com" class="w-full surface rounded-xl px-3.5 py-2.5 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">كلمة المرور</label>
+            <input id="authLoginPass" type="password" placeholder="••••••••" class="w-full surface rounded-xl px-3.5 py-2.5 text-sm" />
+          </div>
+          <button type="submit" class="btn-primary w-full py-3 rounded-xl font-extrabold text-sm"><i class="fas fa-right-to-bracket"></i> تسجيل الدخول</button>
+        </form>
+
+        <form id="authSignupForm" onsubmit="submitCloudUserAuth('signup', event)" class="space-y-3 hidden">
+          <div>
+            <label class="block text-xs font-bold mb-1">الاسم الكامل</label>
+            <input id="authSignupName" type="text" required placeholder="مثال: أحمد محمود" class="w-full surface rounded-xl px-3.5 py-2.5 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">البريد الإلكتروني</label>
+            <input id="authSignupEmail" type="email" required placeholder="student@example.com" class="w-full surface rounded-xl px-3.5 py-2.5 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">كلمة المرور (6 أحرف فأكثر)</label>
+            <input id="authSignupPass" type="password" required minlength="6" placeholder="••••••••" class="w-full surface rounded-xl px-3.5 py-2.5 text-sm" />
+          </div>
+          <button type="submit" class="btn-primary w-full py-3 rounded-xl font-extrabold text-sm"><i class="fas fa-user-plus"></i> إنشاء حساب مستخدم</button>
+        </form>
+
+        <form id="authResetForm" onsubmit="submitCloudUserAuth('reset', event)" class="space-y-3 hidden">
+          <div>
+            <label class="block text-xs font-bold mb-1">البريد الإلكتروني لاستعادة كلمة المرور</label>
+            <input id="authResetEmail" type="email" required placeholder="student@example.com" class="w-full surface rounded-xl px-3.5 py-2.5 text-sm" />
+          </div>
+          <button type="submit" class="btn-primary w-full py-3 rounded-xl font-extrabold text-sm"><i class="fas fa-key"></i> إرسال رابط الاستعادة</button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function switchAuthTab(mode){
+  ['login','signup','reset'].forEach(m => {
+    const form = $('#auth' + m[0].toUpperCase() + m.slice(1) + 'Form');
+    const btn = $('#tab' + m[0].toUpperCase() + m.slice(1) + 'Btn');
+    if(form) form.classList.toggle('hidden', m !== mode);
+    if(btn) btn.className = 'py-1.5 rounded-lg text-xs font-bold ' + (m === mode ? 'btn-primary' : 'btn-soft');
+  });
+}
+
+async function submitCloudUserAuth(mode, e){
+  e.preventDefault();
+  if(mode === 'reset'){
+    const email = ($('#authResetEmail')?.value || '').trim();
+    if(!sbClient){ toast('يرجى ضبط إعدادات Supabase من الإعدادات أولاً'); return; }
+    const { error } = await sbClient.auth.resetPasswordForEmail(email);
+    toast(error ? error.message : 'تم إرسال رسالة استعادة كلمة المرور إلى بريدك');
+    return;
+  }
+
+  if(mode === 'signup'){
+    const fullName = ($('#authSignupName')?.value || '').trim();
+    const email = ($('#authSignupEmail')?.value || '').trim();
+    const password = ($('#authSignupPass')?.value || '').trim();
+    if(!sbClient){
+      state.user.name = fullName || 'طالب';
+      state.auth = { loggedIn:true, role:'user', email, password:'', username:fullName };
+      saveState();
+      enterAuthenticatedApp('dashboard');
+      return;
+    }
+    const { data, error } = await sbClient.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName, role: 'user' } }
+    });
+    if(error){ toast(error.message); return; }
+    state.user.name = fullName || 'طالب';
+    state.auth = { loggedIn:true, role:'user', email, password:'', username:fullName };
+    if(data?.session){
+      cloudData.session = data.session;
+      await syncFromCloud();
+      setupRealtimeSubscriptions();
+    } else {
+      toast('تم إنشاء الحساب! تحقق من بريدك الإلكتروني لتأكيد الحساب ثم سجل الدخول.');
+      return;
+    }
+    saveState();
+    enterAuthenticatedApp('dashboard');
+    return;
+  }
+
+  const emailOrName = ($('#authLoginEmail')?.value || '').trim();
+  const password = ($('#authLoginPass')?.value || '').trim();
+
+  if(sbClient && emailOrName.includes('@')){
+    const { data, error } = await sbClient.auth.signInWithPassword({ email: emailOrName, password });
+    if(error){ toast(error.message); return; }
+    cloudData.session = data.session;
+    state.auth = { loggedIn:true, role:'user', email:emailOrName, password:'', username:emailOrName.split('@')[0] };
+    await syncFromCloud();
+    if(state.auth.role === 'developer'){
+      toast('تم التعرف على حساب مطوّر؛ تم توجيهك للوحة المطوّر.');
+      saveState();
+      enterAuthenticatedApp('dashboard');
+      return;
+    }
+    setupRealtimeSubscriptions();
+    saveState();
+    enterAuthenticatedApp('dashboard');
+    return;
+  }
+
+  state.user.name = emailOrName || 'طالب';
+  state.auth = { loggedIn:true, role:'user', email:emailOrName, password:'', username:emailOrName };
+  saveState();
+  enterAuthenticatedApp('dashboard');
+}
+
+function viewDevAuth(){
+  return `
+    <div class="splash-wrap rounded-3xl">
+      <div class="surface rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <button onclick="goToRoleSelect()" class="text-xs text-muted hover:underline"><i class="fas fa-arrow-${state.lang==='ar'?'right':'left'}"></i> ${t('backToRole')}</button>
+          <button onclick="toggleLanguage()" class="px-2.5 py-1 rounded-lg btn-soft text-xs font-bold">${state.lang==='ar'?'EN':'ع'}</button>
+        </div>
+        <div class="text-center mb-4">
+          <div class="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center text-white text-xl mb-2 bg-purple-600"><i class="fas fa-user-shield"></i></div>
+          <h1 class="text-xl font-extrabold">تسجيل دخول المطوّر السحابي</h1>
+          <p class="text-xs text-muted mt-1">تُتحقق الصلاحيات الإدارية عبر قاعدة البيانات (PostgreSQL RLS)</p>
+        </div>
+        <form onsubmit="submitDevAuth(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold mb-1">البريد الإلكتروني للمطوّر</label>
+            <input id="devEmailInput" type="email" required placeholder="developer@domain.com" class="w-full surface rounded-xl px-3.5 py-2.5 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">كلمة المرور</label>
+            <input id="devPassInput" type="password" required placeholder="••••••••" class="w-full surface rounded-xl px-3.5 py-2.5 text-sm" />
+          </div>
+          <div id="devAuthError" class="hidden text-xs font-bold p-2.5 rounded-xl bg-red-100 text-red-700"></div>
+          <button type="submit" class="w-full py-3 rounded-xl font-extrabold text-sm text-white bg-purple-600 hover:bg-purple-700 transition">
+            <i class="fas fa-lock-open"></i> دخول لوحة المطوّر
+          </button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+async function submitDevAuth(e){
+  e.preventDefault();
+  const errEl = $('#devAuthError');
+  errEl.classList.add('hidden');
+
+  if(!sbClient){
+    errEl.textContent = 'يرجى ربط Supabase (URL + Anon Key) من الإعدادات أولاً، وترقية حسابك إلى role = developer في قاعدة البيانات.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  const email = ($('#devEmailInput')?.value || '').trim();
+  const password = ($('#devPassInput')?.value || '').trim();
+
+  const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
+  if(error){
+    errEl.textContent = error.message || 'بيانات الدخول غير صحيحة.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  cloudData.session = data.session;
+  const { data: prof } = await sbClient.from('profiles').select('*').eq('id', data.session.user.id).maybeSingle();
+  if(!prof || prof.role !== 'developer'){
+    await sbClient.auth.signOut();
+    cloudData.session = null;
+    errEl.textContent = 'هذا الحساب لا يملك صلاحية مطوّر في قاعدة البيانات.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  state.auth = { loggedIn:true, role:'developer', email, password:'', username:prof.full_name || 'Developer' };
+  state.user.name = prof.full_name || 'Developer';
+  await syncFromCloud();
+  setupRealtimeSubscriptions();
+  saveState();
+  enterAuthenticatedApp('dashboard');
+}
+
+function enterAuthenticatedApp(targetPage = 'dashboard'){
+  state.auth.loggedIn = true;
+  state.page = targetPage;
+  saveState();
+  $('#topbar').classList.remove('hidden');
+  if(state.viewMode !== 'mobile') $('#sidebar').classList.remove('hidden');
+  renderNav();
+  render();
+}
+
+async function logoutSession(){
+  stopAllAudio();
+  if(sbClient){
+    try { await sbClient.auth.signOut(); } catch {}
+  }
+  cloudData.session = null;
+  cloudData.profile = null;
+  state.auth.loggedIn = false;
+  state.auth.role = 'user';
+  state.page = 'splash';
+  saveState();
+  $('#topbar').classList.add('hidden');
+  $('#sidebar').classList.add('hidden');
+  render();
+}
+
+/* Themes, Language & View Mode */
+const THEMES = ['light','dark','blue','green','purple'];
+function applyTheme(name){
+  state.theme = name;
+  if(name === 'light') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', name);
+  saveState();
+  const icon = $('#themeIcon');
+  if(icon) icon.className = name === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+function cycleTheme(){
+  const i = THEMES.indexOf(state.theme);
+  applyTheme(THEMES[(i+1) % THEMES.length]);
+}
+function toggleLanguage(){
+  state.lang = state.lang === 'ar' ? 'en' : 'ar';
+  document.documentElement.lang = state.lang;
+  document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+  $('#langLabel').textContent = state.lang === 'ar' ? 'EN' : 'ع';
+  const brand = $('#brand');
+  if(brand) brand.textContent = state.lang === 'ar' ? 'مُعلّم أوفيس الذكي' : 'Smart Office Tutor';
+  saveState();
+  setViewMode(state.viewMode, true);
+  if(state.auth && state.auth.loggedIn) renderNav();
+  render();
+}
+
+function setViewMode(mode, silent = false){
+  state.viewMode = mode;
+  saveState();
+  const frame = $('#appFrame');
+  const laptopBase = $('#laptopBase');
+  const banner = $('#viewportBanner');
+  const bannerIcon = $('#viewportBannerIcon');
+  const bannerText = $('#viewportBannerText');
+
+  if(frame) frame.className = 'app-frame ' + mode;
+  if(mode === 'laptop'){
+    laptopBase?.classList.remove('hidden');
+    banner?.classList.remove('hidden');
+    if(bannerIcon) bannerIcon.className = 'fas fa-laptop text-blue-500';
+    if(bannerText) bannerText.textContent = state.lang === 'ar' ? 'معاينة وضع اللابتوب (1024px)' : 'Laptop Mode Preview (1024px)';
+  } else if(mode === 'mobile'){
+    laptopBase?.classList.add('hidden');
+    banner?.classList.remove('hidden');
+    if(bannerIcon) bannerIcon.className = 'fas fa-mobile-screen-button text-blue-500';
+    if(bannerText) bannerText.textContent = state.lang === 'ar' ? 'معاينة وضع الموبايل (390px)' : 'Mobile Mode Preview (390px)';
+  } else {
+    laptopBase?.classList.add('hidden');
+    banner?.classList.add('hidden');
+  }
+
+  $$('.view-btn').forEach(b => {
+    if(b.dataset.mode === mode) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+
+  if(!silent){
+    const labels = {
+      desktop: state.lang === 'ar' ? 'تم التبديل إلى وضع الكمبيوتر (100%)' : 'Switched to Desktop Mode (100%)',
+      laptop: state.lang === 'ar' ? 'تم التبديل إلى وضع اللابتوب (1024px)' : 'Switched to Laptop Mode (1024px)',
+      mobile: state.lang === 'ar' ? 'تم التبديل إلى وضع الموبايل (390px)' : 'Switched to Mobile Mode (390px)'
+    };
+    toast(labels[mode]);
+  }
+}
+
+function toggleSidebar(){
+  const sb = $('#sidebar');
+  if(!sb) return;
+  sb.classList.toggle('hidden');
+}
+
+/* Navigation */
+const USER_PAGES = [
+  {id:'dashboard', icon:'fa-home', color:'#2563eb'},
+  {id:'learning', icon:'fa-graduation-cap', color:'#0284c7'},
+  {id:'chatbot', icon:'fa-comments', color:'#16a34a'},
+  {id:'lab', icon:'fa-flask', color:'#ea580c'},
+  {id:'quizzes', icon:'fa-clipboard-check', color:'#9333ea'},
+  {id:'skills', icon:'fa-lightbulb', color:'#eab308'},
+  {id:'library', icon:'fa-folder-open', color:'#0d9488'},
+  {id:'profile', icon:'fa-user', color:'#4f46e5'}
+];
+
+const DEV_PAGES = [
+  {id:'dashboard', icon:'fa-gauge-high', color:'#7c3aed'},
+  {id:'profile', icon:'fa-user-shield', color:'#2563eb'},
+  {id:'admin', icon:'fa-sliders', color:'#059669'}
+];
+
+function getActivePages(){
+  if(isDev()){
+    const custom = (cloudData.uiConfig.customTabs || []).map(ct => ({
+      id: 'customtab_' + ct.id,
+      customLabel: state.lang === 'ar' ? ct.title_ar : ct.title_en,
+      customContent: state.lang === 'ar' ? ct.content_ar : ct.content_en,
+      icon: ct.icon || 'fa-layer-group',
+      color: '#7c3aed'
+    }));
+    return [...DEV_PAGES, ...custom];
+  }
+  const hidden = new Set(cloudData.uiConfig.hiddenTabs || []);
+  const custom = (cloudData.uiConfig.customTabs || []).map(ct => ({
+    id: 'customtab_' + ct.id,
+    customLabel: state.lang === 'ar' ? ct.title_ar : ct.title_en,
+    customContent: state.lang === 'ar' ? ct.content_ar : ct.content_en,
+    icon: ct.icon || 'fa-layer-group',
+    color: '#2563eb'
+  }));
+  return [...USER_PAGES.filter(p => !hidden.has(p.id)), ...custom];
+}
+
+function renderNav(){
+  const nav = $('#navLinks');
+  if(!nav) return;
+  const pages = getActivePages();
+  nav.innerHTML = pages.map(p => `
+    <a href="#" onclick="navigate('${p.id}');return false;"
+       class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 ${state.page === p.id ? 'active' : ''}">
+      <i class="fas ${p.icon} w-5 text-center" style="color:${p.color};"></i>
+      <span class="text-sm">${p.customLabel ? esc(p.customLabel) : t(p.id)}</span>
+    </a>
+  `).join('') + (isDev() ? `
+    <div class="pt-3 mt-3 border-t" style="border-color:var(--border);">
+      <a href="#" onclick="openEmbed();return false;" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-sm">
+        <i class="fas fa-code w-5 text-center text-purple-600"></i><span>${t('embedCode')}</span>
+      </a>
+    </div>
+  ` : '');
+}
+
+function navigate(page){
+  if(['splash','role_select','user_login','dev_login'].includes(page)){
+    state.page = page;
+    saveState();
+    render();
+    return;
+  }
+  if(!isDev() && (page === 'admin' || page === 'embed')){
+    toast(state.lang==='ar'?'هذا التبويب متاح للمطوّر فقط':'Developer tab only');
+    return;
+  }
+  if(isDev() && !['dashboard','profile','admin'].includes(page) && !page.startsWith('customtab_')){
+    page = 'dashboard';
+  }
+  state.page = page;
+  saveState();
+  renderNav();
+  render();
+  if(window.innerWidth < 1024) $('#sidebar')?.classList.add('hidden');
+  window.scrollTo(0,0);
+}
+
+/* Router */
+function render(){
+  document.body.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+  $$('[data-i18n]').forEach(el => {
+    const val = t(el.getAttribute('data-i18n'));
+    if(val) el.textContent = val;
+  });
+
+  const c = $('#pageContent');
+  if(state.page === 'splash'){ c.innerHTML = viewSplash(); return; }
+  if(state.page === 'role_select'){ c.innerHTML = viewRoleSelect(); return; }
+  if(state.page === 'user_login'){ c.innerHTML = viewUserAuth(); return; }
+  if(state.page === 'dev_login'){ c.innerHTML = viewDevAuth(); return; }
+
+  if(state.page.startsWith('customtab_')){
+    const ctId = state.page.replace('customtab_','');
+    const ct = (cloudData.uiConfig.customTabs || []).find(x => String(x.id) === String(ctId));
+    c.innerHTML = ct ? `
+      <div class="surface rounded-2xl p-5 max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-3 flex items-center gap-2"><i class="fas ${esc(ct.icon||'fa-layer-group')} text-blue-600"></i> ${esc(state.lang==='ar'?ct.title_ar:ct.title_en)}</h1>
+        <div class="text-sm leading-relaxed whitespace-pre-line">${esc(state.lang==='ar'?ct.content_ar:ct.content_en)}</div>
+      </div>` : `<p class="text-muted">${t('noData')}</p>`;
+    return;
+  }
+
+  if(isDev()){
+    switch(state.page){
+      case 'profile': c.innerHTML = viewDevProfile(); break;
+      case 'admin': c.innerHTML = viewAdmin(); break;
+      default: c.innerHTML = viewDevDashboard(); break;
+    }
+    return;
+  }
+
+  switch(state.page){
+    case 'dashboard': c.innerHTML = viewDashboard(); break;
+    case 'learning': c.innerHTML = viewLearning(); break;
+    case 'lesson': c.innerHTML = viewLesson(); break;
+    case 'chatbot': c.innerHTML = viewChatbot(); break;
+    case 'lab': c.innerHTML = viewLab(); break;
+    case 'quizzes': c.innerHTML = viewQuizzes(); break;
+    case 'skills': c.innerHTML = viewSkills(); break;
+    case 'library': c.innerHTML = viewLibrary(); break;
+    case 'profile': c.innerHTML = viewProfile(); break;
+    default: c.innerHTML = viewDashboard();
+  }
+}
+
+function statCard(icon, val, label, color){
+  return `<div class="surface rounded-2xl p-4 card-hover">
+    <div class="flex items-center gap-2 mb-1"><i class="fas ${icon}" style="color:${color};"></i><span class="text-xs sm:text-sm text-muted">${label}</span></div>
+    <div class="text-2xl font-bold">${val}</div>
+  </div>`;
+}
+
+/* Developer Dashboard & Profile */
+function viewDevDashboard(){
+  const usersCount = cloudData.users.length || 1;
+  const activeUsersCount = cloudData.users.filter(u => u.is_active !== false).length || 1;
+  const lessonsCount = totalLessons();
+  const filesCount = cloudData.userFiles.length;
+  const isAr = state.lang === 'ar';
+
+  return `
+    <div class="space-y-5 max-w-5xl mx-auto">
+      <div class="surface rounded-2xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="text-5xl">${state.settings.avatar}</div>
+          <div>
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700">${isAr?'وضع المطوّر السحابي':'Cloud Developer Mode'}</span>
+            <h1 class="text-xl sm:text-2xl font-extrabold mt-1">${isAr?'مرحباً أيها المطوّر':'Welcome Developer'}, ${esc(state.user.name)}</h1>
+            <p class="text-xs sm:text-sm text-muted">${isAr?'إدارة مركزية للمستخدمين، الدروس، الاختبارات، الإعلانات، والملفات المرفوعة.':'Central control for users, lessons, quizzes, announcements, and uploaded files.'}</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="navigate('admin')" class="btn-primary px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm"><i class="fas fa-sliders"></i> ${isAr?'فتح لوحة الإدارة':'Open Admin Panel'}</button>
+          <button onclick="navigate('profile')" class="btn-soft px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm"><i class="fas fa-user-shield"></i> ${isAr?'ملف المطوّر':'Dev Profile'}</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        ${statCard('fa-users', usersCount, isAr?'إجمالي المستخدمين':'Total Users', '#7c3aed')}
+        ${statCard('fa-user-check', activeUsersCount, isAr?'المستخدمون النشطون':'Active Users', '#16a34a')}
+        ${statCard('fa-book-open', lessonsCount, isAr?'إجمالي الدروس':'Total Lessons', '#2563eb')}
+        ${statCard('fa-file-arrow-up', filesCount, isAr?'ملفات المستخدمين':'Uploaded Files', '#ea580c')}
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-3">
+        <button onclick="state.ctx.devTab='lessons';navigate('admin');" class="surface rounded-2xl p-4 text-start card-hover">
+          <div class="text-xl text-blue-600 mb-2"><i class="fas fa-plus-circle"></i></div>
+          <div class="font-bold text-sm mb-1">${isAr?'إضافة وتغذية الدروس والاختبارات':'Add Lessons & Quizzes'}</div>
+          <div class="text-xs text-muted">${isAr?'أضف دروساً جديدة لتظهر للطلاب ويستفيد منها الشات بوت مباشرة.':'Publish lessons for students and feed the AI tutor.'}</div>
+        </button>
+        <button onclick="state.ctx.devTab='files';navigate('admin');" class="surface rounded-2xl p-4 text-start card-hover">
+          <div class="text-xl text-orange-600 mb-2"><i class="fas fa-folder-open"></i></div>
+          <div class="font-bold text-sm mb-1">${isAr?'مراجعة ملفات المستخدمين':'Review User Files'}</div>
+          <div class="text-xs text-muted">${isAr?'استعرض ملفات التدريب المرفوعة من الطلاب وتابع حالتها.':'Inspect and review files submitted by students.'}</div>
+        </button>
+        <button onclick="state.ctx.devTab='announcements';navigate('admin');" class="surface rounded-2xl p-4 text-start card-hover">
+          <div class="text-xl text-emerald-600 mb-2"><i class="fas fa-bullhorn"></i></div>
+          <div class="font-bold text-sm mb-1">${isAr?'إرسال إعلانات وتخصيص الواجهة':'Announcements & UI Config'}</div>
+          <div class="text-xs text-muted">${isAr?'أرسل إشعارات فورية للطلاب وأدر التبويبات والنصوص.':'Send live announcements and manage tabs & branding.'}</div>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function viewDevProfile(){
+  const isAr = state.lang === 'ar';
+  return `
+    <div class="space-y-4 max-w-3xl mx-auto">
+      <div class="surface rounded-2xl p-5">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="text-5xl">${state.settings.avatar}</div>
+          <div>
+            <h1 class="text-xl font-extrabold">${isAr?'ملف المطوّر الشخصي':'Developer Profile'}</h1>
+            <p class="text-xs text-muted">${esc(state.auth.email || 'Cloud Developer Account')}</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr?'اسم المطوّر المعروض':'Display Name'}</label>
+            <input id="devProfileName" value="${esc(state.user.name)}" class="w-full surface rounded-xl px-3.5 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">${isAr?'تغيير كلمة المرور للحساب السحابي':'Change Cloud Account Password'}</label>
+            <input id="devNewPass" type="password" placeholder="${isAr?'كلمة مرور جديدة (6 أحرف فأكثر)':'New password (6+ chars)'}" class="w-full surface rounded-xl px-3.5 py-2 text-sm" />
+          </div>
+          <button onclick="saveDevProfileChanges()" class="btn-primary px-5 py-2.5 rounded-xl font-bold text-sm">
+            <i class="fas fa-check"></i> ${isAr?'حفظ تغييرات حساب المطوّر':'Save Developer Profile'}
+          </button>
+        </div>
+      </div>
+
+      <div class="surface rounded-2xl p-5">
+        <h3 class="font-bold text-sm mb-3"><i class="fas fa-robot text-purple-600"></i> ${isAr?'تخصيص شكل واسم الروبوت':'Customize Bot Avatar & Name'}</h3>
+        <div class="grid grid-cols-6 gap-2 mb-3">
+          ${['🤖','👨‍🏫','👩‍🏫','🦉','🐱','🚀'].map(a => `
+            <button onclick="state.settings.avatar='${a}';saveState();render();" class="text-2xl p-2 rounded-xl border ${state.settings.avatar===a?'border-purple-600 bg-purple-50':'border-gray-200'}">${a}</button>
+          `).join('')}
+        </div>
+        <div class="flex gap-2">
+          <input id="devBotNameField" value="${esc(state.settings.botName)}" class="flex-1 surface rounded-xl px-3 py-2 text-sm" />
+          <button onclick="state.settings.botName=$('#devBotNameField').value||'أوفيس بوت';saveState();toast('تم التحديث');render();" class="btn-soft px-4 py-2 rounded-xl font-bold text-xs">${isAr?'تحديث الاسم':'Update Name'}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveDevProfileChanges(){
+  const newName = ($('#devProfileName')?.value || '').trim();
+  const newPass = ($('#devNewPass')?.value || '').trim();
+  if(newName){
+    state.user.name = newName;
+    state.auth.username = newName;
+  }
+  if(sbClient && cloudData.session){
+    if(newName){
+      await sbClient.from('profiles').update({ full_name: newName, avatar: state.settings.avatar }).eq('id', cloudData.session.user.id);
+    }
+    if(newPass){
+      if(newPass.length < 6){ toast('كلمة المرور يجب أن تكون 6 أحرف على الأقل'); return; }
+      const { error } = await sbClient.auth.updateUser({ password: newPass });
+      if(error){ toast(error.message); return; }
+      $('#devNewPass').value = '';
+    }
+    await syncFromCloud();
+  }
+  saveState();
+  toast(state.lang==='ar'?'تم حفظ بيانات المطوّر بنجاح':'Developer profile saved');
+  render();
+}
+
+/* Cloud Developer Admin Panel */
+function viewAdmin(){
+  const isAr = state.lang === 'ar';
+  const tab = state.ctx.devTab || 'users';
+  const tabs = [
+    { id:'users', label: isAr?'المستخدمون':'Users', icon:'fa-users' },
+    { id:'lessons', label: isAr?'الدروس والاختبارات':'Lessons & Quizzes', icon:'fa-book-medical' },
+    { id:'files', label: isAr?'ملفات المستخدمين':'User Files', icon:'fa-file-lines' },
+    { id:'announcements', label: isAr?'الإعلانات والواجهة':'Announcements & UI', icon:'fa-bullhorn' },
+    { id:'logs', label: isAr?'سجل الإدارة':'Audit Logs', icon:'fa-clock-rotate-left' }
+  ];
+
+  let bodyHtml = '';
+  if(tab === 'users'){
+    bodyHtml = `
+      <div class="surface rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-sm"><i class="fas fa-users text-purple-600"></i> ${isAr?'جميع المستخدمين المسجلين':'Registered Users'} (${cloudData.users.length})</h3>
+          <button onclick="fetchDeveloperAdminData().then(()=>render())" class="btn-soft px-3 py-1.5 rounded-lg text-xs font-bold"><i class="fas fa-rotate"></i> ${isAr?'تحديث':'Refresh'}</button>
+        </div>
+        ${cloudData.users.length === 0 ? `<p class="text-xs text-muted">${isAr?'لا توجد حسابات مسجلة في السحابة بعد أو لم يتم ربط Supabase.':'No cloud accounts loaded yet.'}</p>` : `
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs border-collapse">
+              <thead>
+                <tr class="border-b" style="border-color:var(--border);">
+                  <th class="p-2 text-start">${isAr?'الاسم':'Name'}</th>
+                  <th class="p-2 text-start">${isAr?'البريد':'Email'}</th>
+                  <th class="p-2 text-start">${isAr?'الدور':'Role'}</th>
+                  <th class="p-2 text-start">${isAr?'النقاط':'Points'}</th>
+                  <th class="p-2 text-start">${isAr?'الحالة':'Status'}</th>
+                  <th class="p-2 text-start">${isAr?'إجراء':'Action'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${cloudData.users.map(u => `
+                  <tr class="border-b" style="border-color:var(--border);">
+                    <td class="p-2 font-bold">${esc(u.full_name||'')}</td>
+                    <td class="p-2">${esc(u.email||'')}</td>
+                    <td class="p-2"><span class="px-2 py-0.5 rounded-full ${u.role==='developer'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'} font-bold">${esc(u.role)}</span></td>
+                    <td class="p-2">${Number(u.points)||0}</td>
+                    <td class="p-2">${u.is_active===false?'<span class="text-red-600 font-bold">موقوف</span>':'<span class="text-green-600 font-bold">نشط</span>'}</td>
+                    <td class="p-2">
+                      ${u.role !== 'developer' ? `
+                        <button onclick="toggleUserActive('${u.id}', ${u.is_active===false})" class="px-2.5 py-1 rounded-lg text-xs font-bold ${u.is_active===false?'bg-green-600 text-white':'bg-red-100 text-red-700'}">
+                          ${u.is_active===false ? (isAr?'تفعيل':'Activate') : (isAr?'إيقاف':'Suspend')}
+                        </button>
+                      ` : '<span class="text-muted">-</span>'}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `}
+      </div>
+    `;
+  } else if(tab === 'lessons'){
+    bodyHtml = `
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="surface rounded-2xl p-4 space-y-2.5">
+          <h3 class="font-bold text-sm"><i class="fas fa-plus-circle text-blue-600"></i> ${isAr?'إضافة درس جديد (يظهر للطلاب ويغذي الروبوت)':'Add New Lesson (Feeds Students & Bot)'}</h3>
+          <select id="newLesProg" class="w-full surface rounded-lg px-3 py-2 text-xs">
+            <option value="word">Microsoft Word</option>
+            <option value="powerpoint">Microsoft PowerPoint</option>
+          </select>
+          <input id="newLesTitleAr" placeholder="عنوان الدرس بالعربية" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <input id="newLesTitleEn" placeholder="Lesson Title in English" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <textarea id="newLesContentAr" rows="3" placeholder="شرح الدرس بالعربية (يعتمد عليه الشات بوت)" class="w-full surface rounded-lg px-3 py-2 text-xs"></textarea>
+          <textarea id="newLesContentEn" rows="3" placeholder="Lesson explanation in English" class="w-full surface rounded-lg px-3 py-2 text-xs"></textarea>
+          <input id="newLesImg" placeholder="رابط صورة توضيحية (اختياري)" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <button onclick="addCloudLesson()" class="btn-primary w-full py-2.5 rounded-xl font-bold text-xs"><i class="fas fa-cloud-arrow-up"></i> ${isAr?'نشر الدرس في السحابة':'Publish Lesson to Cloud'}</button>
+        </div>
+
+        <div class="surface rounded-2xl p-4 space-y-2.5">
+          <h3 class="font-bold text-sm"><i class="fas fa-clipboard-question text-purple-600"></i> ${isAr?'إضافة سؤال اختبار سحابي':'Add Cloud Quiz Question'}</h3>
+          <select id="newQuizProg" class="w-full surface rounded-lg px-3 py-2 text-xs">
+            <option value="word">Word</option>
+            <option value="powerpoint">PowerPoint</option>
+          </select>
+          <input id="newQuizLessonId" placeholder="معرّف الدرس (مثال: w-u1-l1 أو custom_...)" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <input id="newQuizQAr" placeholder="نص السؤال بالعربية" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <input id="newQuizQEn" placeholder="Question in English" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <div class="grid grid-cols-2 gap-2">
+            <input id="newQuizOpt0Ar" placeholder="خيار 1 (عربي)" class="surface rounded-lg px-2.5 py-2 text-xs" />
+            <input id="newQuizOpt1Ar" placeholder="خيار 2 (عربي)" class="surface rounded-lg px-2.5 py-2 text-xs" />
+            <input id="newQuizOpt0En" placeholder="Option 1 (EN)" class="surface rounded-lg px-2.5 py-2 text-xs" />
+            <input id="newQuizOpt1En" placeholder="Option 2 (EN)" class="surface rounded-lg px-2.5 py-2 text-xs" />
+          </div>
+          <select id="newQuizAns" class="w-full surface rounded-lg px-3 py-2 text-xs">
+            <option value="0">الإجابة الصحيحة: الخيار 1</option>
+            <option value="1">الإجابة الصحيحة: الخيار 2</option>
+          </select>
+          <button onclick="addCloudQuiz()" class="btn-soft w-full py-2.5 rounded-xl font-bold text-xs"><i class="fas fa-plus"></i> ${isAr?'إضافة السؤال':'Add Question'}</button>
+        </div>
+      </div>
+
+      <div class="surface rounded-2xl p-4 mt-4">
+        <h3 class="font-bold text-sm mb-2">${isAr?'الدروس الإضافية المنشورة في السحابة':'Published Custom Cloud Lessons'} (${cloudData.customLessons.length})</h3>
+        ${cloudData.customLessons.length === 0 ? `<p class="text-xs text-muted">${isAr?'لا توجد دروس إضافية بعد.':'No custom lessons yet.'}</p>` :
+          cloudData.customLessons.map(cl => `
+            <div class="flex items-center justify-between p-2.5 rounded-xl border mb-2 text-xs" style="border-color:var(--border);">
+              <div>
+                <span class="font-bold">[${esc(cl.program.toUpperCase())}]</span> ${esc(cl.title_ar)} — <span class="text-muted">${esc(cl.title_en)}</span>
+              </div>
+              <button onclick="deleteCloudLesson('${cl.id}')" class="px-2.5 py-1 rounded-lg bg-red-100 text-red-700 font-bold"><i class="fas fa-trash"></i></button>
+            </div>
+          `).join('')}
+      </div>
+    `;
+  } else if(tab === 'files'){
+    bodyHtml = `
+      <div class="surface rounded-2xl p-4 space-y-2">
+        <h3 class="font-bold text-sm mb-2"><i class="fas fa-folder-open text-orange-600"></i> ${isAr?'ملفات المستخدمين المرفوعة':'Uploaded User Files'} (${cloudData.userFiles.length})</h3>
+        ${cloudData.userFiles.length === 0 ? `<p class="text-xs text-muted">${isAr?'لا توجد ملفات مرفوعة حالياً.':'No uploaded files yet.'}</p>` :
+          cloudData.userFiles.map(f => `
+            <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border text-xs" style="border-color:var(--border);">
+              <div>
+                <div class="font-bold"><i class="fas fa-file text-blue-600"></i> ${esc(f.file_name)}</div>
+                <div class="text-muted">Task: ${esc(f.task_id)} • ${Math.max(1,Math.round((f.file_size||0)/1024))} KB • ${esc(f.review_status||'pending')}</div>
+              </div>
+              <div class="flex gap-1.5">
+                <button onclick="downloadUserFile('${esc(f.storage_path)}', '${esc(f.file_name)}')" class="btn-soft px-3 py-1.5 rounded-lg font-bold"><i class="fas fa-download"></i> ${isAr?'تنزيل':'Download'}</button>
+                <button onclick="markFileReviewed('${f.id}')" class="btn-primary px-3 py-1.5 rounded-lg font-bold"><i class="fas fa-check"></i> ${isAr?'اعتماد':'Approve'}</button>
+              </div>
+            </div>
+          `).join('')}
+      </div>
+    `;
+  } else if(tab === 'announcements'){
+    bodyHtml = `
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="surface rounded-2xl p-4 space-y-2.5">
+          <h3 class="font-bold text-sm"><i class="fas fa-bullhorn text-emerald-600"></i> ${isAr?'نشر إعلان فوري للطلاب':'Publish Live Announcement'}</h3>
+          <input id="annTitleAr" placeholder="عنوان الإعلان بالعربية" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <input id="annTitleEn" placeholder="Announcement Title (EN)" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <textarea id="annBodyAr" rows="2" placeholder="نص الإعلان بالعربية" class="w-full surface rounded-lg px-3 py-2 text-xs"></textarea>
+          <textarea id="annBodyEn" rows="2" placeholder="Announcement body (EN)" class="w-full surface rounded-lg px-3 py-2 text-xs"></textarea>
+          <button onclick="publishAnnouncement()" class="btn-primary w-full py-2 rounded-xl font-bold text-xs"><i class="fas fa-paper-plane"></i> ${isAr?'نشر الإعلان':'Publish'}</button>
+        </div>
+
+        <div class="surface rounded-2xl p-4 space-y-2.5">
+          <h3 class="font-bold text-sm"><i class="fas fa-layer-group text-blue-600"></i> ${isAr?'إضافة تبويب مخصص جديد':'Add Custom Navigation Tab'}</h3>
+          <input id="newTabTitleAr" placeholder="اسم التبويب بالعربية" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <input id="newTabTitleEn" placeholder="Tab Title (EN)" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <input id="newTabIcon" placeholder="أيقونة FontAwesome (مثال: fa-star)" value="fa-star" class="w-full surface rounded-lg px-3 py-2 text-xs" />
+          <textarea id="newTabContentAr" rows="2" placeholder="محتوى التبويب بالعربية" class="w-full surface rounded-lg px-3 py-2 text-xs"></textarea>
+          <textarea id="newTabContentEn" rows="2" placeholder="Tab content (EN)" class="w-full surface rounded-lg px-3 py-2 text-xs"></textarea>
+          <button onclick="addCustomTab()" class="btn-soft w-full py-2 rounded-xl font-bold text-xs"><i class="fas fa-plus"></i> ${isAr?'إضافة التبويب':'Add Tab'}</button>
+        </div>
+      </div>
+    `;
+  } else {
+    bodyHtml = `
+      <div class="surface rounded-2xl p-4 space-y-2">
+        <h3 class="font-bold text-sm mb-2"><i class="fas fa-clock-rotate-left text-purple-600"></i> ${isAr?'سجل عمليات الإدارة':'Admin Audit Logs'}</h3>
+        ${cloudData.adminLogs.length === 0 ? `<p class="text-xs text-muted">${t('noData')}</p>` :
+          cloudData.adminLogs.map(l => `
+            <div class="p-2.5 rounded-xl border text-xs flex justify-between" style="border-color:var(--border);">
+              <span><b>${esc(l.action)}</b> — ${esc(l.target_type)} ${esc(l.target_id||'')}</span>
+              <span class="text-muted">${new Date(l.created_at).toLocaleString()}</span>
+            </div>
+          `).join('')}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="space-y-4 max-w-5xl mx-auto">
+      <h1 class="text-2xl font-extrabold"><i class="fas fa-sliders text-purple-600"></i> ${isAr?'لوحة إدارة المطوّر السحابية':'Cloud Developer Admin'}</h1>
+      <div class="flex flex-wrap gap-2">
+        ${tabs.map(tb => `
+          <button onclick="state.ctx.devTab='${tb.id}';render();" class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 ${tab===tb.id?'btn-primary':'btn-soft'}">
+            <i class="fas ${tb.icon}"></i><span>${tb.label}</span>
+          </button>
+        `).join('')}
+      </div>
+      ${bodyHtml}
+    </div>
+  `;
+}
+
+async function toggleUserActive(userId, makeActive){
+  if(!sbClient){ toast('غير مربوط بـ Supabase'); return; }
+  const { error } = await sbClient.from('profiles').update({ is_active: makeActive }).eq('id', userId);
+  if(error){ toast(error.message); return; }
+  await logAdminAction(makeActive ? 'ACTIVATE_USER' : 'SUSPEND_USER', 'profile', userId);
+  await fetchDeveloperAdminData();
+  toast(makeActive ? 'تم تفعيل الحساب' : 'تم إيقاف الحساب');
+  render();
+}
+
+async function addCloudLesson(){
+  const program = $('#newLesProg').value;
+  const title_ar = ($('#newLesTitleAr').value || '').trim();
+  const title_en = ($('#newLesTitleEn').value || title_ar).trim();
+  const content_ar = ($('#newLesContentAr').value || '').trim();
+  const content_en = ($('#newLesContentEn').value || content_ar).trim();
+  const image_url = ($('#newLesImg').value || '').trim();
+  if(!title_ar || !content_ar){ toast('يرجى إدخال عنوان الدرس ومحتواه'); return; }
+  if(!sbClient || !cloudData.session){ toast('يرجى ربط Supabase وتسجيل الدخول كـ developer'); return; }
+
+  const { error } = await sbClient.from('custom_lessons').insert({
+    program,
+    title_ar,
+    title_en,
+    content_ar,
+    content_en,
+    image_url,
+    created_by: cloudData.session.user.id,
+    is_published: true
+  });
+  if(error){ toast(error.message); return; }
+  await logAdminAction('CREATE_LESSON', 'custom_lesson', title_ar, { program });
+  await syncFromCloud();
+  toast('✅ تمت إضافة الدرس وتغذية الشات بوت به');
+  render();
+}
+
+async function deleteCloudLesson(id){
+  if(!sbClient) return;
+  const { error } = await sbClient.from('custom_lessons').delete().eq('id', id);
+  if(error){ toast(error.message); return; }
+  await logAdminAction('DELETE_LESSON', 'custom_lesson', id);
+  await syncFromCloud();
+  toast('تم حذف الدرس');
+  render();
+}
+
+async function addCloudQuiz(){
+  const program = $('#newQuizProg').value;
+  const lesson_id = ($('#newQuizLessonId').value || 'w-u1-l1').trim();
+  const question_ar = ($('#newQuizQAr').value || '').trim();
+  const question_en = ($('#newQuizQEn').value || question_ar).trim();
+  const o0Ar = ($('#newQuizOpt0Ar').value || '').trim();
+  const o1Ar = ($('#newQuizOpt1Ar').value || '').trim();
+  const o0En = ($('#newQuizOpt0En').value || o0Ar).trim();
+  const o1En = ($('#newQuizOpt1En').value || o1Ar).trim();
+  const correct_index = parseInt($('#newQuizAns').value, 10) || 0;
+  if(!question_ar || !o0Ar || !o1Ar){ toast('يرجى إكمال السؤال والخيارات'); return; }
+  if(!sbClient || !cloudData.session){ toast('يرجى ربط Supabase أولاً'); return; }
+
+  const { error } = await sbClient.from('quizzes').insert({
+    lesson_id,
+    program,
+    question_ar,
+    question_en,
+    options_ar: [o0Ar, o1Ar],
+    options_en: [o0En, o1En],
+    correct_index,
+    created_by: cloudData.session.user.id
+  });
+  if(error){ toast(error.message); return; }
+  await logAdminAction('CREATE_QUIZ', 'quiz', lesson_id);
+  await syncFromCloud();
+  toast('✅ تمت إضافة سؤال الاختبار');
+  render();
+}
+
+async function downloadUserFile(storagePath, fileName){
+  if(!sbClient) return;
+  const { data, error } = await sbClient.storage.from('user-submissions').download(storagePath);
+  if(error || !data){ toast(error?.message || 'تعذر تنزيل الملف'); return; }
+  const url = URL.createObjectURL(data);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.click();
+}
+
+async function markFileReviewed(fileId){
+  if(!sbClient) return;
+  const { error } = await sbClient.from('user_files').update({ review_status: 'approved' }).eq('id', fileId);
+  if(error){ toast(error.message); return; }
+  await logAdminAction('APPROVE_FILE', 'user_file', fileId);
+  await syncFromCloud();
+  toast('تم اعتماد الملف');
+  render();
+}
+
+async function publishAnnouncement(){
+  const title_ar = ($('#annTitleAr').value || '').trim();
+  const title_en = ($('#annTitleEn').value || title_ar).trim();
+  const body_ar = ($('#annBodyAr').value || '').trim();
+  const body_en = ($('#annBodyEn').value || body_ar).trim();
+  if(!title_ar || !body_ar){ toast('يرجى إدخال عنوان ونص الإعلان'); return; }
+  if(!sbClient || !cloudData.session){ toast('يرجى ربط Supabase أولاً'); return; }
+
+  const { error } = await sbClient.from('announcements').insert({
+    title_ar, title_en, body_ar, body_en, is_active: true, created_by: cloudData.session.user.id
+  });
+  if(error){ toast(error.message); return; }
+  await logAdminAction('PUBLISH_ANNOUNCEMENT', 'announcement', title_ar);
+  await syncFromCloud();
+  toast('📢 تم نشر الإعلان الفوري');
+  render();
+}
+
+async function addCustomTab(){
+  const title_ar = ($('#newTabTitleAr').value || '').trim();
+  const title_en = ($('#newTabTitleEn').value || title_ar).trim();
+  const icon = ($('#newTabIcon').value || 'fa-star').trim();
+  const content_ar = ($('#newTabContentAr').value || '').trim();
+  const content_en = ($('#newTabContentEn').value || content_ar).trim();
+  if(!title_ar || !content_ar){ toast('يرجى إدخال اسم ومحتوى التبويب'); return; }
+
+  const nextTabs = [...(cloudData.uiConfig.customTabs || []), {
+    id: 'tab_' + Date.now(),
+    title_ar, title_en, icon, content_ar, content_en
+  }];
+  cloudData.uiConfig.customTabs = nextTabs;
+
+  if(sbClient){
+    await sbClient.from('app_settings').upsert({
+      key: 'ui_config',
+      value: cloudData.uiConfig,
+      updated_by: cloudData.session?.user?.id || null
+    });
+    await logAdminAction('ADD_CUSTOM_TAB', 'app_settings', title_ar);
+  }
+  saveState();
+  renderNav();
+  toast('تمت إضافة التبويب المخصص');
+  render();
+}
+
+/* Student Views */
+function viewDashboard(){
+  const pct = progressPct();
+  const doneCount = state.user.completedLessons.length;
+  const last = [...state.user.completedLessons].reverse()[0];
+  const lastInfo = last ? findLesson(last) : null;
+  const nextLesson = allLessons().find(l => !state.user.completedLessons.includes(l.id));
+  const isAr = state.lang === 'ar';
+  const cur = getEffectiveCurriculum();
+
+  return `
+    <div class="space-y-4">
+      ${cloudData.announcements.length ? `
+        <div class="p-3.5 rounded-2xl border border-amber-400/50 bg-amber-50 dark:bg-amber-950/30 flex items-start gap-3">
+          <i class="fas fa-bullhorn text-amber-600 mt-1"></i>
+          <div class="text-xs sm:text-sm">
+            <div class="font-extrabold text-amber-900 dark:text-amber-300">${esc(isAr ? cloudData.announcements[0].title_ar : cloudData.announcements[0].title_en)}</div>
+            <div class="text-amber-800 dark:text-amber-200 mt-0.5">${esc(isAr ? cloudData.announcements[0].body_ar : cloudData.announcements[0].body_en)}</div>
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="surface rounded-2xl p-5">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="text-5xl">${state.settings.avatar}</div>
+            <div>
+              <h1 class="text-xl font-bold">${t('welcome')}، ${esc(state.user.name)} 👋</h1>
+              <p class="text-muted text-sm">${esc(state.settings.botName)} — ${isAr?'المساعد الصوتي الذكي نشط':'Smart Voice Ready'}</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="navigate('chatbot')" class="btn-soft px-4 py-2 rounded-xl font-bold text-sm"><i class="fas fa-comments"></i> ${t('chatbot')}</button>
+            <button onclick="navigate('learning')" class="btn-primary px-5 py-2 rounded-xl font-bold text-sm"><i class="fas fa-play"></i> ${t('continueLearning')}</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        ${statCard('fa-chart-line', pct+'%', t('progress'), 'var(--primary)')}
+        ${statCard('fa-book', doneCount, t('lessonsDone'), '#16a34a')}
+        ${statCard('fa-award', state.user.badges.length, t('badges'), '#f59e0b')}
+        ${statCard('fa-star', state.user.points, t('points'), '#dc2626')}
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-3">
+        <div class="surface rounded-2xl p-4">
+          <h3 class="font-bold mb-2 text-sm"><i class="fas fa-clock text-muted"></i> ${t('lastLesson')}</h3>
+          ${lastInfo ? `<button onclick="openLesson('${lastInfo.id}')" class="w-full text-start p-3 rounded-xl" style="background:var(--primary-soft);">
+            <div class="font-bold text-sm">${tL(lastInfo.title)}</div>
+            <div class="text-xs text-muted mt-1">${tL(lastInfo.unit.title)}</div>
+          </button>` : `<p class="text-muted text-sm">${t('noData')}</p>`}
+        </div>
+        <div class="surface rounded-2xl p-4">
+          <h3 class="font-bold mb-2 text-sm"><i class="fas fa-forward text-muted"></i> ${t('nextLesson')}</h3>
+          ${nextLesson ? `<button onclick="openLesson('${nextLesson.id}')" class="w-full text-start p-3 rounded-xl" style="background:var(--primary-soft);">
+            <div class="font-bold text-sm">${tL(nextLesson.title)}</div>
+            <div class="text-xs text-muted mt-1">${tL(nextLesson.unit.title)}</div>
+          </button>` : `<p class="text-muted text-sm">🎉 ${t('done')}</p>`}
+        </div>
+      </div>
+
+      <div class="surface rounded-2xl p-4">
+        <h3 class="font-bold mb-3 text-sm"><i class="fas fa-bolt text-muted"></i> ${t('quickAccess')}</h3>
+        <div class="grid grid-cols-2 gap-3">
+          ${Object.keys(cur).map(k => `
+            <button onclick="openProgram('${k}')" class="p-3.5 rounded-xl text-start card-hover" style="background:var(--primary-soft);">
+              <div class="flex items-center gap-3">
+                <i class="fab ${cur[k].icon} text-3xl" style="color:${cur[k].color};"></i>
+                <div>
+                  <div class="font-bold text-sm">${tL(cur[k].title)}</div>
+                  <div class="text-xs text-muted">${programLessons(k).length} ${t('lesson')}</div>
+                </div>
+              </div>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function viewLearning(){
+  const cur = getEffectiveCurriculum();
+  return `
+    <div class="space-y-5">
+      <h1 class="text-2xl font-bold"><i class="fas fa-graduation-cap text-blue-600"></i> ${t('learning')}</h1>
+      <div class="grid md:grid-cols-2 gap-4">
+        ${Object.keys(cur).map(k => {
+          const lessons = programLessons(k);
+          const done = lessons.filter(l => state.user.completedLessons.includes(l.id)).length;
+          const pct = lessons.length ? Math.round(done/lessons.length*100) : 0;
+          return `
+            <div class="surface rounded-2xl p-5 card-hover">
+              <div class="flex items-center gap-3 mb-3">
+                <i class="fab ${cur[k].icon} text-4xl" style="color:${cur[k].color};"></i>
+                <div>
+                  <h3 class="font-bold">${tL(cur[k].title)}</h3>
+                  <p class="text-sm text-muted">${cur[k].units.length} ${t('units')}</p>
+                </div>
+              </div>
+              <div class="w-full h-2 rounded-full mb-2" style="background:var(--border);">
+                <div class="h-2 rounded-full" style="width:${pct}%;background:var(--primary);"></div>
+              </div>
+              <div class="text-xs text-muted mb-3">${done}/${lessons.length} (${pct}%)</div>
+              <button onclick="openProgram('${k}')" class="btn-primary px-4 py-2 rounded-lg text-sm font-bold w-full">${t('startLearning')}</button>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function openProgram(key){
+  const cur = getEffectiveCurriculum();
+  const p = cur[key];
+  if(!p) return;
+  state.ctx.program = key;
+  saveState();
+  const c = $('#pageContent');
+  c.innerHTML = `
+    <div class="space-y-4">
+      <button onclick="navigate('learning')" class="text-sm text-muted hover:underline"><i class="fas fa-arrow-${state.lang==='ar'?'right':'left'}"></i> ${t('learning')}</button>
+      <div class="surface rounded-2xl p-5">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <i class="fab ${p.icon}" style="color:${p.color};"></i> ${tL(p.title)}
+        </h2>
+        ${p.units.map(u => `
+          <div class="rounded-xl border mb-3" style="border-color:var(--border);">
+            <div class="p-3 font-bold text-sm flex items-center gap-2" style="background:var(--primary-soft); border-radius:12px 12px 0 0;">
+              <i class="fas ${u.icon || 'fa-folder-open'}" style="color:${u.color || 'var(--primary)'};"></i>
+              <span>${tL(u.title)}</span>
+            </div>
+            <div class="p-2">
+              ${u.lessons.map(l => `
+                <button onclick="openLesson('${l.id}')" class="w-full text-start p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2.5">
+                  <i class="fas ${l.icon || 'fa-file-lines'}" style="color:${u.color || 'var(--primary)'};"></i>
+                  <span class="text-sm flex-1">${tL(l.title)}</span>
+                  <i class="fas ${state.user.completedLessons.includes(l.id)?'fa-check-circle text-green-500':'fa-circle text-gray-300'} text-sm"></i>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  window.scrollTo(0,0);
+}
+
+function openLesson(id){
+  state.ctx.lessonId = id;
+  const info = findLesson(id);
+  if(info) state.ctx.program = info.program;
+  saveState();
+  state.page = 'lesson';
+  renderNav();
+  render();
+  window.scrollTo(0,0);
+}
+
+function viewLesson(){
+  const info = findLesson(state.ctx.lessonId);
+  if(!info) return `<p class="text-muted">${t('noData')}</p>`;
+  const {unit, program} = info;
+  const lesson = info;
+  const done = state.user.completedLessons.includes(lesson.id);
+  const lessons = programLessons(program);
+  const idx = lessons.findIndex(l => l.id === lesson.id);
+  const prev = idx > 0 ? lessons[idx-1] : null;
+  const next = idx < lessons.length-1 ? lessons[idx+1] : null;
+
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <div class="flex items-center justify-between gap-2">
+        <button onclick="openProgram('${program}')" class="text-sm text-muted hover:underline"><i class="fas fa-arrow-${state.lang==='ar'?'right':'left'}"></i> ${t('learning')}</button>
+        <button onclick="speakCurrentLesson(this)" class="btn-soft px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm">
+          <i class="fas fa-volume-high"></i> ${t('listenLesson')}
+        </button>
+      </div>
+
+      <div class="surface rounded-2xl p-5">
+        <div class="text-xs text-muted mb-1">${tL(unit.title)}</div>
+        <h1 class="text-2xl font-bold mb-3 flex items-center gap-2">
+          <i class="fas ${lesson.icon || 'fa-file-lines'}" style="color:${unit.color || 'var(--primary)'};"></i>
+          <span>${tL(lesson.title)}</span>
+        </h1>
+
+        <div class="p-3 rounded-xl mb-4" style="background:var(--primary-soft);">
+          <div class="font-bold text-xs mb-1"><i class="fas fa-bullseye"></i> ${t('objective')}</div>
+          <div class="text-sm">${tL(lesson.objective)}</div>
+        </div>
+
+        <div class="mb-4 leading-relaxed text-sm sm:text-base">${tL(lesson.content).replace(/\n/g,'<br>')}</div>
+
+        ${lesson.image ? `<img src="${lesson.image}" alt="" class="rounded-xl w-full mb-4 max-h-72 object-cover" onerror="this.style.display='none'" loading="lazy"/>` : ''}
+
+        <h3 class="font-bold mt-4 mb-2"><i class="fas fa-list-ol"></i> ${t('steps')}</h3>
+        <ol class="list-decimal ps-6 space-y-1.5 text-sm">${tL(lesson.steps).map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+
+        <div class="flex flex-wrap gap-2 mt-5">
+          <button onclick="askBotAboutLesson()" class="btn-soft px-4 py-2 rounded-lg font-bold text-sm"><i class="fas fa-comments"></i> ${t('askBot')}</button>
+          ${lesson.quiz && lesson.quiz.length ? `<button onclick="startQuiz('${lesson.id}')" class="btn-soft px-4 py-2 rounded-lg font-bold text-sm"><i class="fas fa-clipboard-check"></i> ${t('quiz')}</button>` : ''}
+          <button onclick="markDone('${lesson.id}')" class="px-4 py-2 rounded-lg font-bold text-sm ${done?'bg-green-600 text-white':'btn-primary'}">
+            <i class="fas fa-check"></i> ${done ? t('done') : t('markDone')}
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-between gap-2">
+        ${prev ? `<button onclick="openLesson('${prev.id}')" class="surface px-3 py-2 rounded-lg text-sm"><i class="fas fa-arrow-${state.lang==='ar'?'right':'left'}"></i> ${t('prev')}</button>` : '<div></div>'}
+        ${next ? `<button onclick="openLesson('${next.id}')" class="btn-primary px-3 py-2 rounded-lg text-sm font-bold">${t('next')} <i class="fas fa-arrow-${state.lang==='ar'?'left':'right'}"></i></button>` : '<div></div>'}
+      </div>
+    </div>
+  `;
+}
+
+async function markDone(id){
+  if(!state.user.completedLessons.includes(id)){
+    state.user.completedLessons.push(id);
+    state.user.points += 10;
+    if(Math.floor(state.user.points/100)+1 > state.user.level){
+      state.user.level = Math.floor(state.user.points/100)+1;
+      state.user.badges.push('level_'+state.user.level);
+    }
+    saveState();
+
+    if(sbClient && cloudData.session){
+      const uid = cloudData.session.user.id;
+      const prog = id.startsWith('p-') ? 'powerpoint' : 'word';
+      await Promise.all([
+        sbClient.from('learning_progress').upsert({ user_id: uid, lesson_id: id, program: prog, completed: true }, { onConflict: 'user_id,lesson_id' }),
+        sbClient.from('profiles').update({ points: state.user.points, level: state.user.level, badges: state.user.badges }).eq('id', uid)
+      ]);
+    }
+
+    toast('✓ +10 '+t('points'));
+    render();
+  }
+}
+
+function askBotAboutLesson(){
+  const info = findLesson(state.ctx.lessonId);
+  navigate('chatbot');
+  setTimeout(() => {
+    const input = $('#chatInput');
+    if(input && info){
+      input.value = state.lang==='ar' ? `اشرح لي المزيد عن ${tL(info.title)}` : `Tell me more about ${tL(info.title)}`;
+      input.focus();
+    }
+  }, 100);
+}
+
+/* Chatbot */
+function viewChatbot(){
+  const convs = state.user.conversations;
+  const cur = getConv();
+  return `
+    <div class="max-w-4xl mx-auto">
+      <div class="surface rounded-2xl overflow-hidden flex flex-col" style="height:calc(100dvh - 125px);min-height:440px;">
+        <div class="p-3 border-b flex items-center justify-between" style="border-color:var(--border);">
+          <div class="flex items-center gap-2.5">
+            <div class="text-3xl">${state.settings.avatar}</div>
+            <div>
+              <div class="font-bold text-sm">${esc(state.settings.botName)}</div>
+              <div class="text-xs text-muted">${state.lang==='ar'?'متصل بقاعدة الدروس':'Connected to Curriculum'}</div>
+            </div>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="openSettings()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-xs"><i class="fas fa-volume-high text-blue-600"></i></button>
+            <button onclick="newChat()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><i class="fas fa-plus"></i></button>
+            <button onclick="toggleHistory()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><i class="fas fa-history"></i></button>
+          </div>
+        </div>
+        <div id="historyPanel" class="hidden p-3 border-b overflow-y-auto" style="border-color:var(--border);max-height:180px;">
+          ${convs.length === 0 ? `<p class="text-xs text-muted">${t('noData')}</p>` :
+            convs.slice(0,10).map(c => `<button onclick="loadConv('${c.id}')" class="w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-xs mb-1">${esc(c.title || t('newChat'))}</button>`).join('')}
+        </div>
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3">
+          ${renderMessages(cur)}
+        </div>
+        <div class="p-3 border-t" style="border-color:var(--border);">
+          <div class="flex flex-wrap gap-1.5 mb-2">
+            ${getSuggestions().slice(0,3).map(q => `<button onclick="quickAsk('${q.replace(/'/g,"\\'")}')" class="chip">${esc(q)}</button>`).join('')}
+          </div>
+          <div class="flex gap-2">
+            <button id="micBtn" onclick="toggleVoice()" class="p-2.5 rounded-xl btn-soft"><i class="fas fa-microphone"></i></button>
+            <input id="chatInput" type="text" placeholder="${t('sendMessage')}" class="flex-1 surface rounded-xl px-3.5 py-2 text-sm" onkeypress="if(event.key==='Enter') sendChat()" />
+            <button onclick="sendChat()" class="btn-primary px-4 py-2 rounded-xl font-bold"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function getConv(){
+  if(!state.ctx.conversationId){
+    const conv = {id:'c_'+Date.now(), title:'', messages:[], created:Date.now()};
+    state.user.conversations.unshift(conv);
+    state.ctx.conversationId = conv.id;
+    saveState();
+    return conv;
+  }
+  return state.user.conversations.find(c => c.id === state.ctx.conversationId) || state.user.conversations[0];
+}
+
+function renderMessages(conv){
+  if(!conv || !conv.messages.length){
+    return `<div class="text-center text-muted py-8">
+      <div class="text-6xl mb-3">${state.settings.avatar}</div>
+      <p class="font-bold mb-1 text-base">${t('welcome')} 👋</p>
+      <p class="text-sm">${t('askAnything')}</p>
+    </div>`;
+  }
+  return conv.messages.map((m, idx) => m.role === 'user'
+    ? `<div class="flex justify-end"><div class="chat-user">${esc(m.content)}</div></div>`
+    : `<div class="flex justify-start gap-2">
+        <div class="text-2xl mt-1">${state.settings.avatar}</div>
+        <div class="chat-ai">
+          <div style="white-space:pre-wrap;line-height:1.7;">${esc(m.content)}</div>
+          <div class="flex flex-wrap items-center gap-2 mt-2.5 pt-2 border-t text-xs" style="border-color:var(--border);">
+            <button onclick="speakMsgIndex(${idx}, this)" class="btn-soft px-2.5 py-1 rounded-lg font-bold flex items-center gap-1.5">
+              <i class="fas fa-volume-high"></i> ${t('listen')}
+            </button>
+            <button onclick="copyMsgIndex(${idx})" class="px-2.5 py-1 rounded-lg text-muted hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1">
+              <i class="fas fa-copy"></i> ${state.lang==='ar'?'نسخ':'Copy'}
+            </button>
+          </div>
+        </div>
+      </div>`
+  ).join('');
+}
+
+function speakMsgIndex(idx, btnEl){
+  const conv = getConv();
+  if(conv && conv.messages[idx]) speakText(conv.messages[idx].content, btnEl);
+}
+function copyMsgIndex(idx){
+  const conv = getConv();
+  if(conv && conv.messages[idx]) copyText(conv.messages[idx].content);
+}
+function newChat(){ state.ctx.conversationId = null; saveState(); render(); }
+function loadConv(id){ state.ctx.conversationId = id; saveState(); render(); }
+function toggleHistory(){ $('#historyPanel')?.classList.toggle('hidden'); }
+function quickAsk(q){ const input = $('#chatInput'); if(input){ input.value = q; sendChat(); } }
+
+function getSuggestions(){
+  return state.lang === 'ar'
+    ? ['ما هو Microsoft Word؟','كيف أضيف أمراً إلى QAT؟','ما الفرق بين Animation وTransition؟']
+    : ['What is Microsoft Word?','How to customize QAT?','Animation vs Transition?'];
+}
+
+function normalizeAr(text){
+  return String(text || '').toLowerCase()
+    .replace(/[\u064B-\u0652\u0670\u0640]/g,'')
+    .replace(/[إأآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
+    .replace(/[^\w\s\u0600-\u06FF]/g,' ').replace(/\s+/g,' ').trim();
+}
+
+function localSearch(query){
+  const tokens = normalizeAr(query).split(' ').filter(w => w.length > 1);
+  if(!tokens.length) return [];
+  const kbList = getEffectiveKB();
+  return kbList.map(doc => {
+    const hay = normalizeAr(doc.title + ' ' + doc.content + ' ' + (doc.keywords||[]).join(' '));
+    let score = 0;
+    tokens.forEach(tok => { if(hay.includes(tok)) score += 1; });
+    return { ...doc, score };
+  }).filter(d => d.score > 0).sort((a,b) => b.score - a.score).slice(0,2);
+}
+
+async function sendChat(){
+  const input = $('#chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  const conv = getConv();
+  conv.messages.push({role:'user', content:text, time:Date.now()});
+  if(!conv.title) conv.title = text.slice(0,40);
+  saveState();
+  const box = $('#chatMessages');
+  box.innerHTML = renderMessages(conv);
+  box.scrollTop = box.scrollHeight;
+
+  const thinkId = 't_' + Date.now();
+  box.insertAdjacentHTML('beforeend', `<div id="${thinkId}" class="flex justify-start gap-2">
+    <div class="text-2xl">${state.settings.avatar}</div>
+    <div class="chat-ai"><i class="fas fa-spinner fa-spin"></i> ${t('aiThinking')}</div>
+  </div>`);
+  box.scrollTop = box.scrollHeight;
+
+  const ar = state.lang === 'ar';
+  let reply = '';
+
+  try {
+    if(sbClient && cloudData.session){
+      const { data: fnData, error: fnErr } = await sbClient.functions.invoke('gemini-tutor', {
+        body: {
+          action: 'chat',
+          message: text,
+          history: conv.messages.slice(-6).map(m => ({ role: m.role, content: m.content })),
+          lang: state.lang
+        }
+      });
+      if(!fnErr && fnData?.reply) reply = fnData.reply;
+    }
+  } catch {}
+
+  if(!reply){
+    const results = localSearch(text);
+    if(results.length){
+      reply = `📚 ${results[0].title}\n\n${results[0].content}`;
+    } else {
+      reply = ar
+        ? 'لم أجد إجابة موثوقة لهذا السؤال في المحتوى التعليمي المعتمد حالياً. يمكنك تصفح دروس Word و PowerPoint في مركز التعلم أو إعادة صياغة سؤالك.'
+        : 'I could not find a reliable answer in the approved curriculum. Please browse the Word and PowerPoint lessons in the Learning Center or rephrase your question.';
+    }
+  }
+
+  document.getElementById(thinkId)?.remove();
+  conv.messages.push({role:'assistant', content:reply, time:Date.now()});
+  saveState();
+
+  if(sbClient && cloudData.session){
+    try {
+      const uid = cloudData.session.user.id;
+      let dbConvId = conv.dbId;
+      if(!dbConvId){
+        const { data: cRow } = await sbClient.from('conversations').insert({ user_id: uid, title: conv.title }).select().single();
+        if(cRow){ dbConvId = cRow.id; conv.dbId = dbConvId; }
+      }
+      if(dbConvId){
+        await sbClient.from('messages').insert([
+          { conversation_id: dbConvId, user_id: uid, role: 'user', content: text },
+          { conversation_id: dbConvId, user_id: uid, role: 'assistant', content: reply }
+        ]);
+      }
+    } catch {}
+  }
+
+  box.innerHTML = renderMessages(conv);
+  box.scrollTop = box.scrollHeight;
+}
+
+function copyText(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  toast(t('copied'));
+}
+
+let recognition = null, isRec = false;
+function toggleVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast(state.lang==='ar'?'المتصفح لا يدعم التعرف على الصوت':'Speech recognition unsupported'); return; }
+  if(isRec){ recognition.stop(); return; }
+  recognition = new SR();
+  recognition.lang = state.lang === 'ar' ? 'ar-SA' : 'en-US';
+  recognition.onstart = () => { isRec = true; $('#micBtn')?.classList.add('pulse-rec'); };
+  recognition.onend = () => { isRec = false; $('#micBtn')?.classList.remove('pulse-rec'); };
+  recognition.onresult = (e) => {
+    const input = $('#chatInput');
+    if(input){ input.value = e.results[0][0].transcript; input.focus(); }
+  };
+  recognition.start();
+}
+
+/* Lab & Quizzes */
+const LAB = [
+  {id:'lab1', program:'word', title:L('مهمة مستند Word','Word Document Task'), desc:L('أنشئ مستنداً يحتوي عنواناً وجدولاً ثم ارفع ملفك.','Create a document with a heading and table, then upload your file.')},
+  {id:'lab2', program:'powerpoint', title:L('مهمة عرض PowerPoint','PowerPoint Deck Task'), desc:L('صمّم عرضاً تقديمياً من شرائح واضحة ثم ارفع ملفك.','Design a clear slide deck and upload your file.')}
+];
+
+function viewLab(){
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold"><i class="fas fa-flask text-orange-600"></i> ${t('lab')}</h1>
+      ${LAB.map(task => `
+        <div class="surface rounded-2xl p-4">
+          <div class="text-xs px-2 py-0.5 rounded-full inline-block mb-1" style="background:var(--primary-soft);color:var(--primary);">${t(task.program)}</div>
+          <h3 class="font-bold mb-1">${tL(task.title)}</h3>
+          <p class="text-sm text-muted mb-3">${tL(task.desc)}</p>
+          <input type="file" accept=".docx,.doc,.pptx,.ppt,.pdf" class="text-sm" onchange="uploadLab('${task.id}', this)" />
+          <div id="res_${task.id}" class="mt-2"></div>
+        </div>
+      `).join('')}
+      ${state.user.files.length ? `
+        <div class="surface rounded-2xl p-4">
+          <h3 class="font-bold mb-2 text-sm">${state.lang==='ar'?'ملفاتي المرفوعة':'My Uploaded Files'}</h3>
+          ${state.user.files.map(f => `<div class="text-xs p-2 border-b" style="border-color:var(--border);">📄 ${esc(f.name)}</div>`).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+async function uploadLab(taskId, input){
+  const file = input.files[0];
+  if(!file) return;
+  const res = document.getElementById('res_'+taskId);
+  const sizeKB = Math.max(1, Math.round(file.size/1024));
+
+  if(sbClient && cloudData.session){
+    const uid = cloudData.session.user.id;
+    const safeName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+    const storagePath = `${uid}/${safeName}`;
+    const { error: upErr } = await sbClient.storage.from('user-submissions').upload(storagePath, file);
+    if(upErr){ toast(upErr.message); return; }
+    await sbClient.from('user_files').insert({
+      user_id: uid, task_id: taskId, file_name: file.name, file_size: file.size, storage_path: storagePath
+    });
+    await syncFromCloud();
+  } else {
+    state.user.files.push({name:file.name, size:file.size, task:taskId, time:Date.now()});
+    saveState();
+  }
+
+  res.innerHTML = `<div class="p-3 rounded-xl text-sm" style="background:var(--primary-soft);">✅ ${esc(file.name)} (${sizeKB} KB)</div>`;
+  toast(state.lang==='ar'?'تم الرفع':'Uploaded');
+}
+
+function viewQuizzes(){
+  const withQuiz = allLessons().filter(l => l.quiz && l.quiz.length);
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold"><i class="fas fa-clipboard-check text-purple-600"></i> ${t('quizzes')}</h1>
+      <div class="grid md:grid-cols-2 gap-3">
+        ${withQuiz.map(l => {
+          const r = state.user.quizResults[l.id];
+          return `<div class="surface rounded-2xl p-4">
+            <div class="text-xs text-muted mb-1">${t(l.program)}</div>
+            <h3 class="font-bold text-sm mb-2">${tL(l.title)}</h3>
+            ${r ? `<div class="text-sm mb-2">${t('score')}: <b>${r.score}/${r.total}</b></div>` : ''}
+            <button onclick="startQuiz('${l.id}')" class="btn-primary px-4 py-2 rounded-lg font-bold text-sm w-full">${t('quiz')}</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function startQuiz(lessonId){
+  const info = findLesson(lessonId);
+  if(!info || !info.quiz || !info.quiz.length){ toast(t('noData')); return; }
+  const qs = info.quiz;
+  let answers = new Array(qs.length).fill(null);
+  let cur = 0;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-backdrop';
+  overlay.id = 'quizOverlay';
+
+  function draw(){
+    const q = qs[cur];
+    overlay.innerHTML = `
+      <div class="surface rounded-2xl p-5 w-full max-w-lg shadow-2xl">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-sm">${tL(info.title)} — ${t('quizTitle')}</h3>
+          <button onclick="document.getElementById('quizOverlay').remove()" class="p-1"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="text-xs text-muted mb-2">${cur+1} / ${qs.length}</div>
+        <div class="font-bold mb-3 text-sm">${tL(q.q)}</div>
+        <div class="space-y-2 mb-4">
+          ${q.options.map((opt,i) => `
+            <button onclick="selectQ(${i})" class="w-full text-start p-3 rounded-lg border text-sm"
+              style="border-color:${answers[cur]===i?'var(--primary)':'var(--border)'};background:${answers[cur]===i?'var(--primary-soft)':'transparent'};">
+              ${tL(opt)}
+            </button>
+          `).join('')}
+        </div>
+        <div class="flex justify-between gap-2">
+          <button onclick="prevQ()" class="surface px-4 py-2 rounded-lg text-sm" ${cur===0?'disabled':''}>${t('prev')}</button>
+          ${cur < qs.length-1
+            ? `<button onclick="nextQ()" class="btn-primary px-4 py-2 rounded-lg font-bold text-sm" ${answers[cur]===null?'disabled':''}>${t('next')}</button>`
+            : `<button onclick="submitQ()" class="btn-primary px-4 py-2 rounded-lg font-bold text-sm" ${answers[cur]===null?'disabled':''}>${t('submit')}</button>`}
+        </div>
+      </div>
+    `;
+  }
+
+  window.selectQ = i => { answers[cur] = i; draw(); };
+  window.prevQ = () => { if(cur>0){ cur--; draw(); } };
+  window.nextQ = () => { if(answers[cur]!==null && cur<qs.length-1){ cur++; draw(); } };
+  window.submitQ = async () => {
+    let score = 0;
+    qs.forEach((q,i) => { if(answers[i] === q.answer) score++; });
+    state.user.quizResults[lessonId] = {score, total:qs.length, time:Date.now()};
+    state.user.points += score * 5;
+    saveState();
+
+    if(sbClient && cloudData.session){
+      const uid = cloudData.session.user.id;
+      await Promise.all([
+        sbClient.from('quiz_results').upsert({ user_id: uid, lesson_id: lessonId, score, total: qs.length }, { onConflict: 'user_id,lesson_id' }),
+        sbClient.from('profiles').update({ points: state.user.points }).eq('id', uid)
+      ]);
+    }
+
+    document.getElementById('quizOverlay')?.remove();
+    toast(`${t('score')}: ${score}/${qs.length}`);
+    render();
+  };
+
+  document.body.appendChild(overlay);
+  draw();
+}
+
+function viewSkills(){
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold"><i class="fas fa-lightbulb text-amber-500"></i> ${t('skills')}</h1>
+      <div class="grid md:grid-cols-2 gap-3">
+        <div class="surface rounded-2xl p-4">
+          <h2 class="font-bold mb-2"><i class="fab fa-file-word text-blue-700"></i> Word</h2>
+          ${['تنسيق المستندات','شريط الوصول السريع','حفظ الملفات'].map(s => `<button onclick="quickAskFromSkill('${s}')" class="w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1">${s}</button>`).join('')}
+        </div>
+        <div class="surface rounded-2xl p-4">
+          <h2 class="font-bold mb-2"><i class="fab fa-file-powerpoint text-orange-700"></i> PowerPoint</h2>
+          ${['تصميم الشرائح','الحركات والانتقالات','العروض التقديمية'].map(s => `<button onclick="quickAskFromSkill('${s}')" class="w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1">${s}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+function quickAskFromSkill(skill){
+  navigate('chatbot');
+  setTimeout(() => { const input = $('#chatInput'); if(input){ input.value = skill; input.focus(); } }, 100);
+}
+
+function viewLibrary(){
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold"><i class="fas fa-folder-open text-teal-600"></i> ${t('library')}</h1>
+      <div class="surface rounded-2xl p-4">
+        <h3 class="font-bold mb-2 text-sm">📚 ${t('lessonsDone')}</h3>
+        ${state.user.completedLessons.length === 0 ? `<p class="text-sm text-muted">${t('noData')}</p>` :
+          state.user.completedLessons.map(id => {
+            const info = findLesson(id);
+            return info ? `<button onclick="openLesson('${id}')" class="w-full text-start p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1">✓ ${tL(info.title)}</button>` : '';
+          }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function viewProfile(){
+  return `
+    <div class="space-y-4 max-w-4xl mx-auto">
+      <div class="surface rounded-2xl p-5 text-center">
+        <div class="text-6xl mb-2">${state.settings.avatar}</div>
+        <input id="profileName" value="${esc(state.user.name)}" onchange="updateUserProfileName(this.value)"
+          class="text-xl font-bold text-center surface rounded-lg px-3 py-1 w-full max-w-xs mx-auto" />
+        <div class="text-xs text-muted mt-1">${esc(state.auth.email || state.user.id)}</div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        ${statCard('fa-chart-line', progressPct()+'%', t('progress'), 'var(--primary)')}
+        ${statCard('fa-book', state.user.completedLessons.length, t('lessonsDone'), '#16a34a')}
+        ${statCard('fa-star', state.user.points, t('points'), '#f59e0b')}
+        ${statCard('fa-layer-group', state.user.level, state.lang==='ar'?'المستوى':'Level', '#dc2626')}
+      </div>
+    </div>
+  `;
+}
+
+async function updateUserProfileName(val){
+  state.user.name = val.trim() || 'طالب';
+  saveState();
+  if(sbClient && cloudData.session){
+    await sbClient.from('profiles').update({ full_name: state.user.name }).eq('id', cloudData.session.user.id);
+  }
+  render();
+}
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'smart-office-tutor-data.json';
+  a.click();
+}
+function openResetConfirm(){ $('#resetConfirmModal').classList.remove('hidden'); }
+function executeResetAll(){ localStorage.removeItem(STORAGE_KEY); location.reload(); }
+
+function openSettings(){
+  const m = $('#settingsModal');
+  m.classList.remove('hidden');
+
+  const tg = $('#themeGrid');
+  tg.innerHTML = THEMES.map(th => `
+    <button onclick="applyTheme('${th}');openSettings()" class="p-2 rounded-lg border text-xs ${state.theme===th?'ring-2 ring-blue-500':''}" style="border-color:var(--border);">
+      <div class="w-full h-5 rounded mb-1" style="background:${th==='dark'?'#0f172a':th==='blue'?'#1d4ed8':th==='green'?'#15803d':th==='purple'?'#7c3aed':'#f8fafc'};${th==='light'?'border:1px solid #cbd5e1;':''}"></div>
+      ${t(th)}
+    </button>
+  `).join('');
+
+  const ag = $('#avatarGrid');
+  ag.innerHTML = ['🤖','👨‍🏫','👩‍🏫','🦉','🐱','🚀'].map(a =>
+    `<button onclick="state.settings.avatar='${a}';saveState();openSettings();" class="avatar-opt text-2xl p-2 rounded-lg border ${state.settings.avatar===a?'selected':''}" style="border-color:var(--border);">${a}</button>`
+  ).join('');
+
+  $('#ttsEngine').value = state.settings.ttsEngine || 'smart';
+  $('#geminiVoiceName').value = state.settings.geminiVoiceName || 'Aoede';
+  $('#botNameInput').value = state.settings.botName;
+  if($('#sbUrlInput')) $('#sbUrlInput').value = cloudCfg.supabaseUrl || '';
+  if($('#sbAnonInput')) $('#sbAnonInput').value = cloudCfg.supabaseAnonKey || '';
+  if($('#cloudStatusBadge')) {
+    $('#cloudStatusBadge').textContent = cloudData.connected
+      ? (state.lang==='ar' ? '🟢 متصل بالسحابة' : '🟢 Cloud Connected')
+      : (state.lang==='ar' ? '🟡 غير مربوط بعد' : '🟡 Not Configured');
+  }
+  $('#speechRate').value = state.settings.speechRate;
+  $('#rateVal').textContent = state.settings.speechRate.toFixed(1);
+  $('#fontSize').value = state.settings.fontSize;
+  $('#fsVal').textContent = state.settings.fontSize;
+
+  $('#ttsEngine').onchange = () => {
+    $('#geminiVoiceWrap').className = $('#ttsEngine').value === 'gemini' ? '' : 'hidden';
+  };
+  $('#speechRate').oninput = e => { $('#rateVal').textContent = parseFloat(e.target.value).toFixed(1); };
+  $('#fontSize').oninput = e => { $('#fsVal').textContent = e.target.value; };
+}
+
+function closeModal(id){ $('#'+id).classList.add('hidden'); }
+function saveSettings(){
+  state.settings.ttsEngine = $('#ttsEngine').value;
+  state.settings.geminiVoiceName = $('#geminiVoiceName').value;
+  state.settings.botName = $('#botNameInput').value || 'أوفيس بوت';
+  if($('#sbUrlInput') && $('#sbAnonInput')){
+    cloudCfg.supabaseUrl = $('#sbUrlInput').value.trim();
+    cloudCfg.supabaseAnonKey = $('#sbAnonInput').value.trim();
+    localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify(cloudCfg));
+    initSupabaseClient();
+  }
+  state.settings.speechRate = parseFloat($('#speechRate').value);
+  state.settings.fontSize = parseInt($('#fontSize').value, 10);
+  document.body.style.fontSize = state.settings.fontSize + 'px';
+  saveState();
+  closeModal('settingsModal');
+  toast('✓ ' + t('save'));
+  render();
+}
+
+function openEmbed(){
+  const m = $('#embedModal');
+  m.classList.remove('hidden');
+  const url = location.href.split('?')[0] + '?embed=true';
+  $('#embedCodeArea').value = `<iframe src="${url}" width="100%" height="700" style="border:none;border-radius:16px;" allow="microphone; autoplay" title="Smart Office Tutor"></iframe>`;
+}
+function copyEmbed(){ $('#embedCodeArea').select(); document.execCommand('copy'); toast(t('copied')); }
+function previewEmbed(){ window.open(location.href.split('?')[0] + '?embed=true', '_blank'); }
+
+async function init(){
+  applyTheme(state.theme);
+  setViewMode(state.viewMode, true);
+  document.body.style.fontSize = state.settings.fontSize + 'px';
+  document.documentElement.lang = state.lang;
+  document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+  $('#langLabel').textContent = state.lang === 'ar' ? 'EN' : 'ع';
+  initSupabaseClient();
+
+  if(sbClient){
+    try {
+      const { data } = await sbClient.auth.getSession();
+      if(data?.session){
+        cloudData.session = data.session;
+        await syncFromCloud();
+        setupRealtimeSubscriptions();
+        state.auth.loggedIn = true;
+        if(['splash','role_select','user_login','dev_login'].includes(state.page)){
+          state.page = 'dashboard';
+        }
+      }
+    } catch {}
+  }
+
+  if(state.auth && state.auth.loggedIn){
+    $('#topbar').classList.remove('hidden');
+    if(state.viewMode !== 'mobile') $('#sidebar').classList.remove('hidden');
+    renderNav();
+  } else {
+    state.page = 'splash';
+  }
+
+  render();
+  if('speechSynthesis' in window) window.speechSynthesis.getVoices();
+  $$('.modal-backdrop').forEach(m => m.addEventListener('click', e => { if(e.target === m) m.classList.add('hidden'); }));
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
